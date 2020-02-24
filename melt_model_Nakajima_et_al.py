@@ -38,7 +38,7 @@ rc('text', usetex=True)
 
 #vimp = vesc
 Mtotal = 0.999827862
-Mtotal = 0.50
+Mtotal = 5.0
 gamma = 0.1
 vel = 1.0
 
@@ -50,7 +50,7 @@ vel = 1.0
 
 Mt =   (1.0 - gamma)*Mtotal  # target mass in the Martian mass
 Mi = gamma*Mtotal # impactor mass in the Martian mass
-ang = impact_angle[0] # this has to be chosen from 0, 30, 60, 90
+ang = impact_angle[2] # this has to be chosen from 0, 30, 60, 90
 #vel = 1.0 # this is normalized by the escape velocity
 Lp = 5.2e6 # specific energy for melting 
 Latentheat= 10e5 # latent heat
@@ -111,15 +111,19 @@ def create_model(theta, r, x): #r is the radius, x is the angle
 
 
 #  ---- computing the structure of a planet ----
-rho_P = [line.split() for line in open('rho_p.dat')]
+#rho_P = [line.split() for line in open('rho_p.dat')]
+rho_P = [line.split() for line in open('rho_u_S3160.dat')]
 rho_input=np.zeros(shape=(0,0))
 P_input=np.zeros(shape=(0,0))
+U_input=np.zeros(shape=(0,0))
 
 for m in range(1,len(rho_P)):
-    rho_input = np.append(rho_input,float(rho_P[m][0])*1e3)
+    rho_input = np.append(rho_input,float(rho_P[m][0])) #1e3
     P_input = np.append(P_input,float(rho_P[m][1])*1e9)
+    U_input = np.append(U_input,float(rho_P[m][2]))
 
 rho_P_function=interp1d(P_input, rho_input)
+rho_U_function=interp1d(rho_input, U_input)
 
 def compute_density(P):
 
@@ -128,6 +132,14 @@ def compute_density(P):
         return rho_input[0]
     else:
         return rho_P_function(P)
+
+def compute_internal_energy(rho):
+
+    U=rho_U_function(rho)
+    if U < 0.0:
+        return 0.0
+    else:
+        return U
 
 
 
@@ -179,7 +191,7 @@ def compute_coreradius(Mt):
 # --- end of computing the structure of a planet
 
 
-if vel == 1.0:
+if vel == 0:
     vimp_vesc = 0
 else:
     vimp_vesc = 1
@@ -196,10 +208,7 @@ ang = ang/180.0*np.pi
 targetmassfraction = Mt/(Mt + Mi)
 
 
-if vimp_vesc==0:
-    levels = np.arange(-2, 25, 2)
-else:
-    levels = np.arange(0, 25, 2)
+levels = np.arange(-2, 100, 2)
 
 # potential energy
 dPE = (- 0.6 - 0.6*ratio**2.0/(Ri/Rt) - ratio/(1.0+Ri/Rt) + 0.6*(1.0 + ratio)**2.0/(Rti/Rt))*GG*Mt**2.0/Rt
@@ -288,6 +297,7 @@ nr=int(len(rr))
 drr = (rr[1]-rr[0])/rr[len(rr)-1]
 dangle = theta_angle[1]-theta_angle[0] 
 du = np.zeros(shape=(nr,nt))
+du_initial  = np.zeros(shape=(nr,nt))
 number = np.zeros(shape=(nr,nt))
 rmax_meltpool_model = 1.0 # magma ocean depth. 1.0: no magma ocean, 0.0: the entire mantle is molten 
             
@@ -304,12 +314,15 @@ for m in range(0,nr):
     for n in range(0,nt):
         dV=np.abs(np.pi*rr[m]**2.0*np.sin(theta_angle[n])*drr*dangle)
         totalV=totalV+dV
-                
+
+        print(rr[m],theta_angle[n]/np.pi*180.0,du[m][n]*1e-5)
+        
         if du[m][n] > Latentheat:
             meltV=meltV+dV
             # magma ocean depth is measured at psi = 0
-            if rmax_meltpool_model > rr[m] and n == int(0.5*nt):
-                rmax_meltpool_model = rr[m]  
+            if rmax_meltpool_model > rr[m] and np.abs(theta_angle[n])<np.pi/6.0:#n == int(0.5*nt):
+                rmax_meltpool_model = rr[m]
+                print(rr[m],theta_angle[n]/np.pi*180.0,du[m][n]*1e-5)
         
 melt_model=meltV/totalV
 
@@ -350,7 +363,9 @@ fig1=plt.figure(figsize=(10,6.128*2))
 #ax = fig1.add_subplot(111,adjustable='box',aspect=ap)
 ax = fig1.add_subplot(111,adjustable='box', polar=True)
 
+level2=[int(Latentheat*1e-5)]
 CS=ax.contourf(theta_angle,rr,du,cmap=vik_map,vmin=5,vmax=15,levels=levels)
+CS2=ax.contour(CS,levels=level2, colors="white",linewidths=1, vmin=5, vmax=15)
 
 ax.set_rmax(1.0); ax.set_rmin(0.0)
 ax.set_thetamin(-179.9);
