@@ -280,8 +280,8 @@ Mplanet = Mantle_mass_model*(Mt + Mi) #planetary mass
 rcore = compute_coreradius(Mplanet) #core radius
 
 # grid spacing for calculating the magma ocean geometry
-rr=np.linspace(rcore,1,30)
-theta_angle=np.linspace(-np.pi, np.pi, 30)
+rr=np.linspace(rcore,1.0,30)
+theta_angle=np.linspace(-np.pi, np.pi, 60)
 nt=int(len(theta_angle))
 nr=int(len(rr))
 
@@ -347,65 +347,23 @@ dy=0.5
 ap=dx/dy*0.618
 
 fig1=plt.figure(figsize=(10,6.128*2))
-ax = fig1.add_subplot(111,adjustable='box',aspect=ap)
+#ax = fig1.add_subplot(111,adjustable='box',aspect=ap)
+ax = fig1.add_subplot(111,adjustable='box', polar=True)
 
+CS=ax.contourf(theta_angle,rr,du,cmap=vik_map,vmin=5,vmax=15,levels=levels)
 
+ax.set_rmax(1.0); ax.set_rmin(0.0)
+ax.set_thetamin(-179.9);
+ax.set_thetamax(180)
+ax.set_xticks(np.array([-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180]) / 180. * np.pi)
+ax.set_yticks([0.6, 0.8, 1.0])
+ax.set_theta_zero_location('N')
 
-CS=ax.contourf(theta_angle/np.pi*180,rr,du,cmap=vik_map,vmin=5,vmax=15,levels=levels)
-CS2=ax.contour(CS,levels=levels, colors="white",linewidths=1, vmin=5, vmax=15)
-ax.clabel(CS,inline=False,fontsize=0)
+cNorm = mpl.colors.Normalize(vmin=5, vmax=20)
+ax3 = fig1.add_axes([0.27, 0.05, 0.45, 0.015])  # left, bottom, width, height (range 0 to 1)
+cb1 = mpl.colorbar.ColorbarBase(ax3, cmap=vik_map, norm=cNorm, orientation='horizontal')
+cb1.set_label('Internal Energy Gain ($10^5$ J/kg)')
 
-#boundes = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-cbar=plt.colorbar(CS, fraction=0.025, pad=0.04)
-#cbar.set_clim(5, 15)
-
-cbar.set_ticks([np.linspace(0,20,num=10)])
-cbar.set_label("Internal energy ($10^5$ J/kg)")
-
-
-
-for axis in ['top','bottom','left','right']:
-    ax.spines[axis].set_linewidth(border_w)        
-    
-ax.set_xlim([-180,180])
-ax.set_ylim([0.5,1])
-
-
-text_font=12
-font_label=14
-border_width=3
-font_xylabels=13
-
-xint=60
-yint=0.1
-
-
-ax.set_xlabel('Angle $\psi$',fontsize=font_label)
-ax.set_ylabel(r'Normalized Radius ($\theta=$' + str(ang/np.pi*180)  + '$^{\circ}$)' ,fontsize=font_label)
-ax.set_title('Model',fontsize=font_label)
-
-
-xlim=[-180,180]
-ylim=[0.5,1.01]
-
-
-ax.xaxis.set_ticks(np.arange(xlim[0],xlim[1]+0.01, xint))
-ax.yaxis.set_ticks(np.arange(ylim[0],ylim[1]+0.01, yint))
-ax.set(xlim=xlim,ylim=ylim)
-ax.xaxis.set_tick_params(labelsize=font_xylabels)
-ax.yaxis.set_tick_params(labelsize=font_xylabels)
-
-    
-for axis in ['top','bottom','left','right']:
-    ax.spines[axis].set_linewidth(border_width)
-    ax.xaxis.set_ticks(np.arange(xlim[0],xlim[1]+0.01, xint))
-    ax.yaxis.set_ticks(np.arange(ylim[0],ylim[1]+0.01, yint))
-
-
-plt.show()
-plt.close()
-    
-fig1.suptitle(' Internal Energy ($10^5$ J/kg)',fontsize=15)
 fig1.savefig(outputfigurename)
 
 #--------
