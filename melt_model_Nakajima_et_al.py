@@ -7,12 +7,11 @@ import seaborn as sns
 from pylab import scatter
 import pylab
 import scipy.optimize as op
-from figure3 import test_figure3
+#from figure3 import test_figure3
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import rc
 import matplotlib as mpl
 from scipy.interpolate import interp1d
-#from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 #coefficients
@@ -30,30 +29,60 @@ impact_angle = [0, 30, 60, 90]
 cm_data = np.loadtxt("vik/vik.txt")
 vik_map = LinearSegmentedColormap.from_list('vik', cm_data)
 
+
+cm_data2 = np.loadtxt("turku/turku.txt")
+turku_map = LinearSegmentedColormap.from_list('turku', cm_data2)
+
+
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
+# default values
+Mtotal = 2.0
+gamma = 0.5
+vel = 2.0 #this means that vimp=vesc
+entropy0 = 1100
+outputfigurename = 'output.eps' #output figure name
 
-# ---  input data  -------
+# ---  input data  -- reading from input.txt ---- 
+input_list = [line.split() for line in open('input.txt')]
 
-#vimp = vesc
-Mtotal = 1.0
-gamma = 0.1
-vel = 1.0 #this means that vimp=vesc
+for i in range(0,len(input_list)):
+    if 'Mtotal' in input_list[i]:
+        Mtotal = float(input_list[i][2])
+    if 'gamma' in input_list[i]:
+        gamma = float(input_list[i][2])
+    if 'vel' in input_list[i]:
+        vel = float(input_list[i][2])
+    if 'outputfigurename' in input_list[i]:
+        outputfigurename = input_list[i][2]
+        
+    if 'entropy0' in input_list[i]:
+        entropy0 = float(input_list[i][2])
+        if entropy0==1100:
+            entropyfile = 'rho_u_S1100.dat'
+        elif entropy0==3160:
+            entropyfile = 'rho_u_S3160.dat'
+        else:
+            print('no entropy file exists with this entropy value -- choose either 1100 or 3160')
+            sys.exit()
+    if 'angle' in input_list[i]:
+        ang = float(input_list[i][2])
+        if ang not in impact_angle:
+            print('Chosee impact angle among 0, 30, 60, and 90 degrees')
+            sys.exit()
 
-#vimp > vesc
-#Mtotal =  1.87793434
-#gamma = 0.5
-#vel =  1.29999995 
-
+            
 
 Mt =   (1.0 - gamma)*Mtotal  # target mass in the Martian mass
 Mi = gamma*Mtotal # impactor mass in the Martian mass
-ang = impact_angle[1] # this has to be chosen from 0, 30, 60, 90
-#vel = 1.0 # this is normalized by the escape velocity
-Lp = 5.2e6 # specific energy for melting 
-Latentheat= 10e5 # latent heat
-outputfigurename = 'output.eps' #output figure name
+EM = 5.2e6 # specific energy for melting 
+Latentheat= 7.18e5 # latent heat
+rho_P = [line.split() for line in open(entropyfile)]
+
+
+
+
 
 levels = np.arange(-2, 100, 2)
 vmin_value=5; vmax_value=40
@@ -102,25 +131,24 @@ def Mantle_mass_model_highV(gamma,x):
 
 
 def create_model(theta, r, x): #r is the radius, x is the angle
-    y_model= theta[0]*r**(-2)*legendre(0,np.cos(x)) +  theta[1]*r**(-2)*legendre(1,np.cos(x)) +  theta[2]*r**(-2)*legendre(2,np.cos(x))\
-             +  theta[3]*r**(-1)*legendre(0,np.cos(x)) +  theta[4]*r**(-1)*legendre(1,np.cos(x)) +  theta[5]*r**(-1)*legendre(2,np.cos(x))\
-             +  theta[6]*r**(0)*legendre(0,np.cos(x))  +  theta[7]*r**(0)*legendre(1,np.cos(x))  +  theta[8]*r**(0)*legendre(2,np.cos(x)) \
-             +  theta[9]*r**(1)*legendre(0,np.cos(x)) +  theta[10]*r**(1)*legendre(1,np.cos(x)) +  theta[11]*r**(1)*legendre(2,np.cos(x)) \
-             +  theta[12]*r**(2)*legendre(0,np.cos(x)) +  theta[13]*r**(2)*legendre(1,np.cos(x)) +  theta[14]*r**(2)*legendre(2,np.cos(x))
+    y_model = 0.0
+    k = 0
+    for i in range(0,5):
+        for j in range(0,3):
+            y_model = y_model + theta[k]*r**(i-2)*legendre(j, np.cos(x))
+            k=k+1
 
     return y_model
 
 
 #  ---- computing the structure of a planet ----
-#rho_P = [line.split() for line in open('rho_p.dat')]
-rho_P = [line.split() for line in open('rho_u_S1100.dat')]
-#rho_P = [line.split() for line in open('rho_u_S3160.dat')]
+
 rho_input=np.zeros(shape=(0,0))
 P_input=np.zeros(shape=(0,0))
 U_input=np.zeros(shape=(0,0))
 
 for m in range(1,len(rho_P)):
-    rho_input = np.append(rho_input,float(rho_P[m][0])) #1e3
+    rho_input = np.append(rho_input,float(rho_P[m][0]))
     P_input = np.append(P_input,float(rho_P[m][1])*1e9)
     U_input = np.append(U_input,float(rho_P[m][2]))
 
@@ -200,7 +228,6 @@ def compute_coreradius(Mt):
     Mass=Mt
     CoreMass=0.3*Mt
 
-    #print('a',Mt)
 
     while (Mass > CoreMass):
         rho=compute_density(P)
@@ -213,14 +240,12 @@ def compute_coreradius(Mt):
 # --- end of computing the structure of a planet
 
 
+# merging criteria from Genda e tal 2012
+def v_cr(GammaG, theta):
+    theta_G=1-np.sin(theta)
+    return 2.43*GammaG**2.0*theta_G**2.5-0.0408*GammaG+1.86*theta_G**2.50+1.08
 
 
-
-
-if vel == 1.0:
-    vimp_vesc = 0
-else:
-    vimp_vesc = 1
 
 
 Mt = Mt*Mmar
@@ -238,7 +263,6 @@ targetmassfraction = Mt/(Mt + Mi)
 
 
 
-
 # potential energy
 dPE = (- 0.6 - 0.6*ratio**2.0/(Ri/Rt) - ratio/(1.0+Ri/Rt) + 0.6*(1.0 + ratio)**2.0/(Rti/Rt))*GG*Mt**2.0/Rt
 # initial kinetic energy
@@ -248,56 +272,35 @@ dKE =  ratio/(1 + Ri/Rt)*GG*Mt**2.0/Rt*vel**2.0
 dx=90.0
 dy=1
 ap=dx/dy*0.618
- 
-
-if vimp_vesc==0:
 
 
-    m0= 0.9232925
-    m1= 0.076443
-    h0= 0.73550873
-    h1= 0.12824856
-    h2= -0.02226599
+# reading parameter coefficients for melt model
+parameter_list = [line.split() for line in open('parameter.txt')]
+para0=np.array(parameter_list[0][:]).astype(np.float)
+para1=np.array(parameter_list[1][:]).astype(np.float)
 
-    e0=0.18432
-    e1=0.06338
-    e2=0.00353
-    e3=0.06389
-    e4=0.10604
-    e5=-0.18243
-    e6=0.0279
-    
+critical_velocity=v_cr((Mt-Mi)/(Mt+Mi), ang)
+
+if vel <= critical_velocity: # merging
+    Mantle_mass_model=para0[10]*legendre(0,np.cos(ang)) +  para0[11]*legendre(1,np.cos(ang))
+    h_model=para0[0]*legendre(0,ang) +  para0[1]*legendre(1,ang)  +  para0[2]*legendre(2,ang)
+else: #no merging
+    Mantle_mass_model = Mantle_mass_model_highV(targetmassfraction, ang)    
+    h_model = para1[0]*legendre(0,np.cos(ang)) +  para1[1]*legendre(1,np.cos(ang))  +  para1[2]*legendre(2,np.cos(ang))
+
+if vel <=1.0:
+    ee=para0[3:10]
+elif vel <=1.1:
+    ee=para0[3:10] + (vel-1.0)/0.1 * (para1[3:10]-para0[3:10])
 else:
+    ee=para1[3:10]
 
-    e0=0.01935
-    e1=0.04506
-    e2=0.11079
-    e3=0.17159
-    e4=0.14955
-    e5=-0.11511
-    e6=-0.01596
-    
-    h0=0.67129416
-    h1=0.35726835
-    h2=-0.24558039
+IE_model=  ee[0]*legendre(0,np.cos(ang)) + ee[1]*legendre(1,np.cos(ang)) + ee[2]*legendre(2,np.cos(ang)) + ee[3]*legendre(3,np.cos(ang)) +  ee[4]*legendre(4,np.cos(ang)) +  ee[5]*legendre(5,np.cos(ang)) +  ee[6]*legendre(6,np.cos(ang))
 
-# Mantle_mass_model: Eq 6, Eq 8
-# h_model: Eq 5, Eq 7
-# IE_model: Eq 3
-
-if vimp_vesc==0:
-    Mantle_mass_model=m0*legendre(0,np.cos(ang)) +  m1*legendre(1,np.cos(ang)) 
-    h_model=h0*legendre(0,ang) +  h1*legendre(1,ang)  +  h2*legendre(2,ang)
-            
-else:
-    Mantle_mass_model = Mantle_mass_model_highV(targetmassfraction, ang)
-    h_model = h0*legendre(0,np.cos(ang)) +  h1*legendre(1,np.cos(ang))  +  h2*legendre(2,np.cos(ang))
-
-IE_model=  e0*legendre(0,np.cos(ang)) + e1*legendre(1,np.cos(ang)) + e2*legendre(2,np.cos(ang)) + e3*legendre(3,np.cos(ang))+  e4*legendre(4,np.cos(ang)) + e5*legendre(5,np.cos(ang)) + e6*legendre(6,np.cos(ang))
 
 # computing the internal energy (Equation 3)
 u_ave=h_model*IE_model*(dPE + dKE)/(0.70*Mantle_mass_model*(Mt + Mi))       
-f_model = h_model*IE_model*(dPE + dKE)/(0.70*Mantle_mass_model*(Mt+Mi))/Lp
+f_model = h_model*IE_model*(dPE + dKE)/(0.70*Mantle_mass_model*(Mt+Mi))/EM
 
 if f_model>1:
     f_model = 1.0
@@ -355,14 +358,9 @@ du_gain=du_gain*u_ave
 for m in range(0,nr):
     for n in range(0,nt):
         du_initial = float(r_U_function(rr[m]))
-
-        #print(du[m][n], du_gain[m][n], rr[m], m,n, 'a')
         du[m][n] = du[m][n] + du_initial
 
-        #print(du[m][n] , du_gain[m][n], rr[m], m,n)
 
-
-#sys.exit()
 for m in range(0,nr):
     for n in range(0,nt):
         Press =  r_P_function(rr[m])
@@ -372,10 +370,6 @@ for m in range(0,nr):
             du_melt[m][n] = 1.0
         else:
             du_melt[m][n] = 0.0
-        print(du[m][n]/1000, Tmelt*1e-6, du_melt[m][n], Tmelt/1000.0)
-
-#sys.exit()
-
 
 meltV=0.0     
 totalV=0.0
@@ -384,8 +378,6 @@ for m in range(0,nr):
     for n in range(0,nt):
         dV=np.abs(np.pi*rr[m]**2.0*np.sin(theta_angle[n])*drr*dangle)
         totalV=totalV+dV
-
-        #print(rr[m],theta_angle[n]/np.pi*180.0,du[m][n]*1e-5)
         
         if du_gain[m][n] > Latentheat:
             meltV=meltV+dV
@@ -448,8 +440,11 @@ CS=ax[0].contourf(theta_angle,rr,du_gain*1e-5,cmap=vik_map,vmin=5,vmax=20,levels
 CS2=ax[0].contour(CS,levels=level2, colors="white",linewidths=1, vmin=5, vmax=15)
 CS3=ax[1].contourf(theta_angle, rr, du_gain_melt, vmin=0, vmax=1.0,cmap='inferno')
 
-CS4=ax[4].contourf(theta_angle,rr,du,cmap=vik_map,vmin=vmin_value,vmax=vmax_value,levels=levels)
-#CS5=ax[2].contour(CS4,levels=level2, colors="white",linewidths=1, vmin=5, vmax=15)
+#you have to choose either of this to make the figure
+CS4=ax[2].contourf(theta_angle,rr,du,cmap=turku_map, vmin=vmin_value,vmax=vmax_value,levels=levels)
+CS6=ax[3].contourf(theta_angle, rr, du_melt, vmin=0, vmax=1.0, cmap='inferno')
+
+CS4=ax[4].contourf(theta_angle,rr,du,cmap=turku_map,vmin=vmin_value,vmax=vmax_value,levels=levels)
 CS6=ax[5].contourf(theta_angle, rr, du_melt, vmin=0, vmax=1.0, cmap='inferno')
 
 
@@ -468,21 +463,23 @@ cb1 = mpl.colorbar.ColorbarBase(ax3, cmap=vik_map, norm=cNorm, orientation='hori
 
 cNorm = mpl.colors.Normalize(vmin=vmin_value, vmax=vmax_value)
 ax4 = fig1.add_axes([0.375, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
-cb2 = mpl.colorbar.ColorbarBase(ax4, cmap=vik_map, norm=cNorm, orientation='horizontal')
+cb2 = mpl.colorbar.ColorbarBase(ax4, cmap=turku_map, norm=cNorm, orientation='horizontal')
 
 cNorm = mpl.colors.Normalize(vmin=0, vmax=1)
 ax5 = fig1.add_axes([0.7, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
 cb3 = mpl.colorbar.ColorbarBase(ax5, cmap='inferno', norm=cNorm, orientation='horizontal')
 
 ax[0].text(np.pi /5, 1.6, '(a) Internal Energy Gain', fontsize=15, color="black")
-ax[1].text(np.pi /5, 1.6, '(b) Melt Fraction', fontsize=15, color="black")
+ax[1].text(np.pi /4., 1.82, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
 ax[2].text(np.pi /5, 1.6, '(c) Total Internal Energy', fontsize=15, color="black")
-ax[3].text(np.pi /5, 1.6, '(d) Melt Fraction', fontsize=15, color="black")
+ax[3].text(np.pi /4, 1.82, '(d) Mantle Melt Mass Fraction', fontsize=15, color="black")
 ax[4].text(np.pi /5, 1.6, '(e) Total Internal Energy ', fontsize=15, color="black")
-ax[5].text(np.pi /5, 1.6, '(f) Melt Fraction', fontsize=15, color="black")
+ax[5].text(np.pi /4, 1.82, '(f) Mantle Melt Mass Fraction', fontsize=15, color="black")
 
 ax[2].text(np.pi/2, 0.4, '$S_0=3160$ J/K/kg', fontsize=10, color="black")
+ax[3].text(np.pi/2, 0.4, '$S_0=3160$ J/K/kg', fontsize=10, color="black")
 ax[4].text(np.pi/2, 0.4, '$S_0=1100$ J/K/kg', fontsize=10, color="black")
+ax[5].text(np.pi/2, 0.4, '$S_0=1100$ J/K/kg', fontsize=10, color="black")
 
 cb1.set_label('Internal Energy Gain ($10^5$ J/kg)')
 cb2.set_label('Total Internal Energy ($10^5$ J/kg)')

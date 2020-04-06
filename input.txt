@@ -1,0 +1,7 @@
+# please have space between the parameter name, '=', and parameter value
+Mtotal = 3.25 #total mass normalized by Mars mass
+gamma = 0.091 #impactor-to-total mass ratio
+vel = 1.1 #impact velocity normalized by the ecape velocity
+entropy0 = 3160 #entropy of the initial body. For now, choices are 1100 and 3160 J/K/kg
+angle = 30 #impact angle. 0 is a head-on collision. Choose from 0, 30, 60, 90
+outputfigurename = output.eps #name of output figure
