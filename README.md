@@ -20,8 +20,8 @@ outputfigurename: Name of the output figure name <br />
 python melt_model_Nakajima_et_al.py  <br />
 
 This will calculate three different pressures;  <br />
-magma ocean depth and pressure for a melt pool model: 0.518000000000015, 54.70739524218776 GPa
-magma ocean depth and pressure for a global magma ocean model: 0.0, 2.5580251604379935e+31 GPa
-magma ocean depth and pressure for a conventional model: 0.8555730908432091, 14.211187973666862 GPa
+magma ocean depth and pressure for a melt pool model: x0 km,  y0 GPa <br />
+magma ocean depth and pressure for a global magma ocean model: x1 km, y1 GPa <br />
+magma ocean depth and pressure for a conventional model: x2, y2 GPa <br />
 
-
+These are calculated pressure at the base of a magma ocean depth in km and equivalent GPa for a melt pool model, global magma ocean model, and conventional model.
