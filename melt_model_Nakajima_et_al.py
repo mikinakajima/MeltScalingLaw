@@ -26,14 +26,13 @@ a3=-7.4332e-5
 GG=6.67408e-11
 impact_angle = [0, 30, 60, 90]
 
+# color maps
 cm_data = np.loadtxt("vik/vik.txt")
 vik_map = LinearSegmentedColormap.from_list('vik', cm_data)
-
-
 cm_data2 = np.loadtxt("turku/turku.txt")
 turku_map = LinearSegmentedColormap.from_list('turku', cm_data2)
 
-
+# font
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
@@ -188,7 +187,7 @@ def integrate_internal_energy(Mt):
         P = np.append(P, press)
         Mass=Mass-4*np.pi*rho*rr[i]**2.0*dr
 
-    return u, P, rr/r
+    return u, P, rr/r, Rt
 
 
 
@@ -243,9 +242,6 @@ def v_cr(GammaG, theta):
     theta_G=1-np.sin(theta)
     return 2.43*GammaG**2.0*theta_G**2.5-0.0408*GammaG+1.86*theta_G**2.50+1.08
 
-
-
-
 Mt = Mt*Mmar
 Mi = Mi*Mmar
 Rt = radius(Mt) 
@@ -255,10 +251,6 @@ vesc = np.sqrt(2.0*GG*(Mt + Mi)/(Rt + Ri))
 ratio = Mi/Mt
 ang = ang/180.0*np.pi
 targetmassfraction = Mt/(Mt + Mi)
-
-
-
-
 
 
 # potential energy
@@ -318,7 +310,8 @@ melt_model=np.zeros(4)
 Mplanet = Mantle_mass_model*(Mt + Mi) #planetary mass
 rcore = compute_coreradius(Mplanet) #core radius
 
-u, P, r = integrate_internal_energy(Mplanet)
+
+u, P, r, rplanet = integrate_internal_energy(Mplanet)
 
 r_U_function=interp1d(r, u)
 r_P_function=interp1d(r, P)
@@ -392,16 +385,18 @@ melt_model=meltV/totalV
 Pmax_meltpool_model = compute_pressure(Mplanet,rmax_meltpool_model)
 
 # assuming the same melt volume as the melt pool
-rmax_global_model = (1.0-meltV/totalV)**0.333
+rmax_global_model = (1.0-meltV/totalV*(1.0-rcore**3.0))**0.333
 Pmax_global_model = compute_pressure(Mplanet, rmax_global_model)
 
 # assuming the conventional melt model (Eq 4)
-rmax_conventional_model = (1.0-f_model)**0.333
+rmax_conventional_model = (1.0-f_model*(1.0-rcore**3.0))**0.333
 Pmax_conventional_model =  compute_pressure(Mplanet, rmax_conventional_model)
 
-print ("magma ocean depth and pressure for a melt pool model: " + str(rmax_meltpool_model) + ", " + str(Pmax_meltpool_model) + " GPa")
-print ("magma ocean depth and pressure for a global magma ocean model: " + str(rmax_global_model) + ", " + str(Pmax_global_model) + " GPa")
-print ("magma ocean depth and pressure for a conventional model: " + str(rmax_conventional_model) + ", " + str(Pmax_conventional_model) + " GPa")
+print(rplanet*1e-3)
+
+print ("magma ocean depth and pressure for a melt pool model: " + str(rplanet*1e-3*(1.0-rmax_meltpool_model)) + " km, " + str(Pmax_meltpool_model) + " GPa")
+print ("magma ocean depth and pressure for a global magma ocean model: " + str(rplanet*1e-3*(1.0-rmax_global_model)) + " km, " + str(Pmax_global_model) + " GPa")
+print ("magma ocean depth and pressure for a conventional model: " + str(rplanet*1e-3*(1.0-rmax_conventional_model)) + " km, " + str(Pmax_conventional_model) + " GPa")
 
        
 du=du*1e-5
