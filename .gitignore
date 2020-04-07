@@ -3,4 +3,6 @@ vik
 turku
 *.zip
 .DS_Store
+output.eps
+README.pdf
 
