@@ -1,4 +1,6 @@
 lapaz
 vik
 turku
+*.zip
+.DS_Store
 
