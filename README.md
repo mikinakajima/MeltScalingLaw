@@ -24,4 +24,8 @@ magma ocean depth and pressure for a melt pool model: x0 km,  y0 GPa <br />
 magma ocean depth and pressure for a global magma ocean model: x1 km, y1 GPa <br />
 magma ocean depth and pressure for a conventional model: x2, y2 GPa <br />
 
-These are calculated pressure at the base of a magma ocean depth in km and equivalent GPa for a melt pool model, global magma ocean model, and conventional model.
+These are calculated pressure at the base of a magma ocean depth in km and equivalent GPa for a melt pool model, global magma ocean model, and conventional model. <br />
+
+If you have questions, please feel free to reach out to Miki Nakajima (mnakajima@rochester.edu).
+
+
