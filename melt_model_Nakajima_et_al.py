@@ -61,8 +61,12 @@ for i in range(0,len(input_list)):
         entropy0 = float(input_list[i][2])
         if entropy0==1100:
             entropyfile = 'rho_u_S1100.dat'
+            initial_S0 =  '$S_0=1100$ J/K/kg'
+            
         elif entropy0==3160:
             entropyfile = 'rho_u_S3160.dat'
+            initial_S0 =  '$S_0=3160$ J/K/kg'
+    
         else:
             print('no entropy file exists with this entropy value -- choose either 1100 or 3160')
             sys.exit()
@@ -70,19 +74,13 @@ for i in range(0,len(input_list)):
         ang = float(input_list[i][2])
         if ang not in impact_angle:
             print('Chosee impact angle among 0, 30, 60, and 90 degrees')
-            sys.exit()
-
-            
+            sys.exit()            
 
 Mt =   (1.0 - gamma)*Mtotal  # target mass in the Martian mass
 Mi = gamma*Mtotal # impactor mass in the Martian mass
 EM = 5.2e6 # specific energy for melting 
 Latentheat= 7.18e5 # latent heat
-rho_P = [line.split() for line in open(entropyfile)]
-
-
-
-
+rho_P = [line.split() for line in open(entropyfile)] #relationship between rho-P assuming S0=3160 J/K/kg. We also assume that rho-P structure is the same at S0=1100 J/K/kg.
 
 levels = np.arange(-2, 100, 2)
 vmin_value=5; vmax_value=40
@@ -344,7 +342,6 @@ rmax_meltpool_model = 1.0 # magma ocean depth. 1.0: no magma ocean, 0.0: the ent
 
 # make the internal energy as a function of r
 
-
 for m in range(0,nr):
     for n in range(0,nt):
         du[m][n] = create_model(theta[impact_angle.index(ang/np.pi*180)], rr[m], theta_angle[n])
@@ -353,7 +350,6 @@ for m in range(0,nr):
 du=du*u_ave
 du_gain=du_gain*u_ave
 
-#du_gain=du
 
 for m in range(0,nr):
     for n in range(0,nt):
@@ -384,19 +380,13 @@ for m in range(0,nr):
             du_gain_melt[m][n] = 1.0
 
             # magma ocean depth is measured at psi = 0
-            if rmax_meltpool_model > rr[m] and np.abs(theta_angle[n])<np.pi/6.0:#n == int(0.5*nt):
+            if rmax_meltpool_model > rr[m] and np.abs(theta_angle[n])<np.pi/6.0:
                 rmax_meltpool_model = rr[m]
-                #print(rr[m],theta_angle[n]/np.pi*180.0,du[m][n]*1e-5)
-
-        #print(du_gain_melt[m][n])
         
 melt_model=meltV/totalV
 
 
-
 # --- estimating the magma ocean depth and corresponding pressure
-
-
 
 #rmax_meltpool_model = max(rcore, rmax_meltpool_model)
 Pmax_meltpool_model = compute_pressure(Mplanet,rmax_meltpool_model)
@@ -426,14 +416,11 @@ dy=0.5
 ap=dx/dy*0.618
 
 fig1=plt.figure(figsize=(10,6.128*2))
-ax= [0, 0, 0, 0, 0, 0]
-#ax = fig1.add_subplot(111,adjustable='box',aspect=ap)
-ax[0] = fig1.add_subplot(321,adjustable='box', polar=True)
-ax[1] = fig1.add_subplot(322,adjustable='box', polar=True)
-ax[2] = fig1.add_subplot(323,adjustable='box', polar=True)
-ax[3] = fig1.add_subplot(324,adjustable='box', polar=True)
-ax[4] = fig1.add_subplot(325,adjustable='box', polar=True)
-ax[5] = fig1.add_subplot(326,adjustable='box', polar=True)
+ax= [0, 0, 0, 0]
+ax[0] = fig1.add_subplot(221,adjustable='box', polar=True)
+ax[1] = fig1.add_subplot(222,adjustable='box', polar=True)
+ax[2] = fig1.add_subplot(223,adjustable='box', polar=True)
+ax[3] = fig1.add_subplot(224,adjustable='box', polar=True)
 
 level2=[int(Latentheat*1e-5)]
 CS=ax[0].contourf(theta_angle,rr,du_gain*1e-5,cmap=vik_map,vmin=5,vmax=20,levels=levels)
@@ -443,9 +430,6 @@ CS3=ax[1].contourf(theta_angle, rr, du_gain_melt, vmin=0, vmax=1.0,cmap='inferno
 #you have to choose either of this to make the figure
 CS4=ax[2].contourf(theta_angle,rr,du,cmap=turku_map, vmin=vmin_value,vmax=vmax_value,levels=levels)
 CS6=ax[3].contourf(theta_angle, rr, du_melt, vmin=0, vmax=1.0, cmap='inferno')
-
-CS4=ax[4].contourf(theta_angle,rr,du,cmap=turku_map,vmin=vmin_value,vmax=vmax_value,levels=levels)
-CS6=ax[5].contourf(theta_angle, rr, du_melt, vmin=0, vmax=1.0, cmap='inferno')
 
 
 for i in range(0,len(ax)):
@@ -457,6 +441,17 @@ for i in range(0,len(ax)):
     ax[i].tick_params(labelcolor='grey')
     ax[i].set_theta_zero_location('N')
 
+   
+    
+ax[0].text(np.pi/5, 1.6, '(a) Internal Energy Gain', fontsize=15, color="black")
+ax[1].text(np.pi/5, 1.6, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
+ax[2].text(np.pi/5, 1.6, '(c) Total Internal Energy', fontsize=15, color="black")
+ax[3].text(np.pi/5, 1.6, '(d) Mantle Melt Mass Fraction', fontsize=15, color="black")
+ax[2].text(np.pi/2, 0.4, initial_S0, fontsize=10, color="black")
+ax[3].text(np.pi/2, 0.4, initial_S0, fontsize=10, color="black")
+
+
+# color bars
 cNorm = mpl.colors.Normalize(vmin=5, vmax=20)
 ax3 = fig1.add_axes([0.05, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
 cb1 = mpl.colorbar.ColorbarBase(ax3, cmap=vik_map, norm=cNorm, orientation='horizontal')
@@ -469,17 +464,6 @@ cNorm = mpl.colors.Normalize(vmin=0, vmax=1)
 ax5 = fig1.add_axes([0.7, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
 cb3 = mpl.colorbar.ColorbarBase(ax5, cmap='inferno', norm=cNorm, orientation='horizontal')
 
-ax[0].text(np.pi /5, 1.6, '(a) Internal Energy Gain', fontsize=15, color="black")
-ax[1].text(np.pi /4., 1.82, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
-ax[2].text(np.pi /5, 1.6, '(c) Total Internal Energy', fontsize=15, color="black")
-ax[3].text(np.pi /4, 1.82, '(d) Mantle Melt Mass Fraction', fontsize=15, color="black")
-ax[4].text(np.pi /5, 1.6, '(e) Total Internal Energy ', fontsize=15, color="black")
-ax[5].text(np.pi /4, 1.82, '(f) Mantle Melt Mass Fraction', fontsize=15, color="black")
-
-ax[2].text(np.pi/2, 0.4, '$S_0=3160$ J/K/kg', fontsize=10, color="black")
-ax[3].text(np.pi/2, 0.4, '$S_0=3160$ J/K/kg', fontsize=10, color="black")
-ax[4].text(np.pi/2, 0.4, '$S_0=1100$ J/K/kg', fontsize=10, color="black")
-ax[5].text(np.pi/2, 0.4, '$S_0=1100$ J/K/kg', fontsize=10, color="black")
 
 cb1.set_label('Internal Energy Gain ($10^5$ J/kg)')
 cb2.set_label('Total Internal Energy ($10^5$ J/kg)')
@@ -489,7 +473,7 @@ left = 0.05  # the left side of the subplots of the figure
 right = 0.95  # the right side of the subplots of the figure
 bottom = 0.1  # the bottom of the subplots of the figure
 top = 0.9  # the top of the subplots of the figure
-wspace = -0.4  # the amount of width reserved for blank space between subplots
+wspace = 0.1  # the amount of width reserved for blank space between subplots
 hspace = 0.5  # the amount of height reserved for white space between subplots
 
 fig1.subplots_adjust(left=left, bottom=bottom, right=right, top=top, wspace=wspace, hspace=hspace)
