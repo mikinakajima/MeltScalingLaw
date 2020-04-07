@@ -392,8 +392,6 @@ Pmax_global_model = compute_pressure(Mplanet, rmax_global_model)
 rmax_conventional_model = (1.0-f_model*(1.0-rcore**3.0))**0.333
 Pmax_conventional_model =  compute_pressure(Mplanet, rmax_conventional_model)
 
-print(rplanet*1e-3)
-
 print ("magma ocean depth and pressure for a melt pool model: " + str(rplanet*1e-3*(1.0-rmax_meltpool_model)) + " km, " + str(Pmax_meltpool_model) + " GPa")
 print ("magma ocean depth and pressure for a global magma ocean model: " + str(rplanet*1e-3*(1.0-rmax_global_model)) + " km, " + str(Pmax_global_model) + " GPa")
 print ("magma ocean depth and pressure for a conventional model: " + str(rplanet*1e-3*(1.0-rmax_conventional_model)) + " km, " + str(Pmax_conventional_model) + " GPa")
