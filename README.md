@@ -1,7 +1,7 @@
 # MeltScalingLaw
 Melt Scaling law from Nakajima et al. in rev.
 
-This is a scaling law described in Nakajima et al. in review.
+This is a scaling law described in Nakajima et al. in review. To use the scaling law, please take the following steps.
 
 1. Download color maps from Fabio Crameri's website by typing  <br />
 ./DownloadColormaps.sh 
@@ -26,6 +26,6 @@ magma ocean depth and pressure for a conventional model: x2, y2 GPa <br />
 
 These are calculated depth (in km) and pressure (in GPa) at the base of a magma ocean depth for a melt pool model, global magma ocean model, and conventional model. <br />
 
-If you have questions, please feel free to reach out to Miki Nakajima (mnakajima@rochester.edu).
+If you have questions, please feel free to reach out to Miki Nakajima (mnakajima@rochester.edu). If you use this scaling law, please be sure to cite our paper, Nakajima et al., in review.
 
 
