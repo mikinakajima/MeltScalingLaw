@@ -41,7 +41,7 @@ magma ocean depth and pressure for a conventional model: 303.5506251133121 km, 9
 ```
 and a figure called output.eps
 
-![Image description](https://github.com/mikinakajima/MeltScalingLaw/blob/master/output.eps)
+![Image description](https://github.com/mikinakajima/MeltScalingLaw/blob/master/output.png)
 
 ```
 Mtotal: Total mass normalized by Mars mass <br />
