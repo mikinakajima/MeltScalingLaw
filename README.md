@@ -8,14 +8,14 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-Make sure you have python on your machine and 
+Make sure you have python on your machine and the following libraries.
 
 ```
-python <br />
-matplotlib<br />
-numpy<br />
-sys<br />
-scipy<br />
+python
+matplotlib
+numpy
+sys
+scipy
 
 ```
 
