@@ -14,14 +14,26 @@ What things you need to install the software and how to install them
 python
 ```
 
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+Download color maps from Fabio Crameri's website by typing
 
 ```
-Give the example
+./DownloadColormaps.sh 
+```
+
+
+### Running the script
+
+2. To change input parameters, open input.txt file <br />
+
+
+
+```
+Mtotal: Total mass normalized by Mars mass <br />
+gamma: Imapctor-to-total mass ratio <br />
+vel: Imapct velocity normalized by mutual escape velocity <br />
+entropy0: Initial mantle entropy (before impact) <br />
+angle: Impact angle (0 is a head-on collision and 90 is the most oblique impact. Choose from 0, 30, 60, 90 degrees) <br />
+outputfigurename: Name of the output figure name <br />
 ```
 
 And repeat
