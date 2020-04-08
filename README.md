@@ -1,4 +1,4 @@
-# Melt Scaling law (Nakajima et al. in review)
+# Melt Scaling law 
 
 This is a scaling law described in Nakajima et al. in review. To use the scaling law, please take the following steps.
 
