@@ -8,10 +8,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-Make sure you have python on your machine and the following libraries.
+Make sure you have python3 on your machine and the following libraries.
 
 ```
-python
 matplotlib
 numpy
 sys
@@ -28,8 +27,18 @@ Download color maps from Fabio Crameri's website by typing
 
 ### Running the script
 
-2. To change input parameters, open input.txt file <br />
+To run a script, simply type
 
+```
+python  melt_model_Nakajima_et_al.py
+```
+This will generate the following output
+
+```
+magma ocean depth and pressure for a melt pool model: 2278.4837243704346 km, 86.15126263895684 GPa
+magma ocean depth and pressure for a global magma ocean model: 898.1255099313564 km, 29.474287387562157 GPa
+magma ocean depth and pressure for a conventional model: 303.5506251133121 km, 9.21756896904488 GPa
+```
 
 
 ```
