@@ -3,7 +3,7 @@ Melt Scaling law from Nakajima et al. in rev.
 
 This is a scaling law described in Nakajima et al. in review. To use the scaling law, please take the following steps.
 
-*1. Download color maps from Fabio Crameri's website by typing*  <br />
+**1. Download color maps from Fabio Crameri's website by typing**  <br />
 ./DownloadColormaps.sh 
 
 2. To change input parameters, open input.txt file <br />
