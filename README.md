@@ -39,7 +39,9 @@ magma ocean depth and pressure for a melt pool model: 2278.4837243704346 km, 86.
 magma ocean depth and pressure for a global magma ocean model: 898.1255099313564 km, 29.474287387562157 GPa
 magma ocean depth and pressure for a conventional model: 303.5506251133121 km, 9.21756896904488 GPa
 ```
+and a figure called output.eps
 
+![Image description](output.eps)
 
 ```
 Mtotal: Total mass normalized by Mars mass <br />
