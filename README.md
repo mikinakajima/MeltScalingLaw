@@ -8,10 +8,15 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+Make sure you have python on your machine and 
 
 ```
-python
+python <br />
+matplotlib<br />
+numpy<br />
+sys<br />
+scipy<br />
+
 ```
 
 Download color maps from Fabio Crameri's website by typing
