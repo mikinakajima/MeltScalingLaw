@@ -47,12 +47,12 @@ Additionally, a figure called output.eps is generated <br />
 
 You can modify the input.txt to change the input values.
 ```
-Mtotal: Total mass normalized by Mars mass <br />
-gamma: Imapctor-to-total mass ratio <br />
-vel: Imapct velocity normalized by mutual escape velocity <br />
-entropy0: Initial mantle entropy (before impact) <br />
-angle: Impact angle (0 is a head-on collision and 90 is the most oblique impact. Choose from 0, 30, 60, 90 degrees) <br />
-outputfigurename: Name of the output figure name <br />
+Mtotal: Total mass normalized by Mars mass 
+gamma: Imapctor-to-total mass ratio 
+vel: Imapct velocity normalized by mutual escape velocity 
+entropy0: Initial mantle entropy (before impact)
+angle: Impact angle (0 is a head-on collision and 90 is the most oblique impact. Choose from 0, 30, 60, 90 degrees) 
+outputfigurename: Name of the output figure name 
 ```
 
 
