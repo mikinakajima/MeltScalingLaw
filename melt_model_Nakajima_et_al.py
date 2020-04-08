@@ -3,11 +3,7 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 import numpy as np
 import sys
-import seaborn as sns
-from pylab import scatter
-import pylab
 import scipy.optimize as op
-#from figure3 import test_figure3
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import rc
 import matplotlib as mpl
@@ -418,11 +414,12 @@ ax[3] = fig1.add_subplot(224,adjustable='box', polar=True)
 level2=[int(Latentheat*1e-5)]
 CS=ax[0].contourf(theta_angle,rr,du_gain*1e-5,cmap=vik_map,vmin=5,vmax=20,levels=levels)
 CS2=ax[0].contour(CS,levels=level2, colors="white",linewidths=1, vmin=5, vmax=15)
-CS3=ax[1].contourf(theta_angle, rr, du_gain_melt, vmin=0, vmax=1.0,cmap='inferno')
+#CS3=ax[1].contourf(theta_angle, rr, du_gain_melt, vmin=0, vmax=1.0,cmap='inferno')
+CS3=ax[1].contourf(theta_angle, rr, du_gain_melt, vmin=0, vmax=1.0,cmap=plt.cm.inferno)
 
 #you have to choose either of this to make the figure
 CS4=ax[2].contourf(theta_angle,rr,du,cmap=turku_map, vmin=vmin_value,vmax=vmax_value,levels=levels)
-CS6=ax[3].contourf(theta_angle, rr, du_melt, vmin=0, vmax=1.0, cmap='inferno')
+CS6=ax[3].contourf(theta_angle, rr, du_melt, vmin=0, vmax=1.0, cmap=plt.cm.inferno)
 
 
 for i in range(0,len(ax)):
@@ -455,7 +452,7 @@ cb2 = mpl.colorbar.ColorbarBase(ax4, cmap=turku_map, norm=cNorm, orientation='ho
 
 cNorm = mpl.colors.Normalize(vmin=0, vmax=1)
 ax5 = fig1.add_axes([0.7, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
-cb3 = mpl.colorbar.ColorbarBase(ax5, cmap='inferno', norm=cNorm, orientation='horizontal')
+cb3 = mpl.colorbar.ColorbarBase(ax5, cmap=plt.cm.inferno, norm=cNorm, orientation='horizontal')
 
 
 cb1.set_label('Internal Energy Gain ($10^5$ J/kg)')
