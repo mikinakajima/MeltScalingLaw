@@ -18,6 +18,15 @@ class Model:
 
     def __init__(self, Mtotal=2.0, gamma=0.5, vel=2.0, entropy0=1100, impact_angle=90,
                  outputfigurename="output.eps", use_tex=False):
+        """
+        :param Mtotal:
+        :param gamma:
+        :param vel:
+        :param entropy0:
+        :param impact_angle:
+        :param outputfigurename:
+        :param use_tex:
+        """
         self.Mmar = 6.39e23  # mass of Mars
         self.R0 = 1.5717e6  # impactor radius
         self.M0 = 6.39e22   # scaling coefficient
