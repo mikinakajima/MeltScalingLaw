@@ -239,7 +239,7 @@ class Model:
         ax[3] = fig1.add_subplot(224, adjustable='box', polar=True)
 
         level2 = [int(self.latent_heat * 1e-5)]
-        CS = ax[0].contourf(self.theta_angle, self.rr, self.du_gain * 1e-5, cmap=self.vik_map, vmin=5, vmax=20,
+        CS = ax[0].contourf(self.theta_angle, self.rr, self.du_gain, cmap=self.vik_map, vmin=5, vmax=20,
                             levels=self.levels)
         CS2 = ax[0].contour(CS, levels=level2, colors="white", linewidths=1, vmin=5, vmax=15)
         # CS3=ax[1].contourf(theta_angle, rr, du_gain_melt, vmin=0, vmax=1.0,cmap='inferno')
@@ -458,5 +458,6 @@ class Model:
             rplanet * 1e-3 * (1.0 - rmax_conventional_model)) + " km, " + str(Pmax_conventional_model) + " GPa")
 
         self.du = du * 1e-5
+        self.du_gain = du_gain * 1e-5
 
         # --------
