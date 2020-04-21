@@ -62,5 +62,5 @@ outputfigurename: Name of the output figure name
 ### Questions?
 
 If you have questions, please feel free to reach out to Miki Nakajima (mnakajima@rochester.edu). If you use this scaling law, please be sure to cite our paper, Nakajima et al., in review.
-
+https://arxiv.org/abs/2004.04269
 
