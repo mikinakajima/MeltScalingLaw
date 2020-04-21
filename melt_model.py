@@ -14,6 +14,10 @@ from scipy.interpolate import interp1d
 # what is the parameters file, and would it be better to store it in the script?
 # what is the critical velocity
 
+# TO DO
+# fix h model
+# magma ocean depth is fixed at psi = 0
+
 class Model:
 
     def __init__(self, Mtotal=2.0, gamma=0.5, vel=2.0, entropy0=1100, impact_angle=90,
@@ -43,7 +47,7 @@ class Model:
         # default values
         self.Mtotal = Mtotal  # total mass
         self.gamma = gamma  # impactor-to-total-mass ratio
-        self.vel = vel  # impact velocity, this means that vimp = vesc (i.e. v_inf = 0)
+        self.vel = vel  # impact velocity normalized by the escape velocity (this means that vimp = vesc(i.e. v_inf = 0))
         self.entropy0 = entropy0  # initial entropy (assuming adiabatic, dS/dr = 0)
         # default value of 1100 J/K/kg represents an adiabatic mantle with a surface temperature of 300K
         # default value of 3160 J/K/kg represents an adiabatic mantle with a surface temperature of 2000K
@@ -63,16 +67,17 @@ class Model:
         self.vmax_value = 40
         # --- end of input data ---
 
-        self.rho_input = np.zeros(shape=(0, 0))
-        self.P_input = np.zeros(shape=(0, 0))
-        self.U_input = np.zeros(shape=(0, 0))
+        # calculating rho-P relationship of planetary interior assuming that the mantle has a constant entropy.
+        self.rho_input = np.zeros(shape=(0, 0)) # density model
+        self.P_input = np.zeros(shape=(0, 0)) # pressure model
+        self.U_input = np.zeros(shape=(0, 0)) # internal energy model
 
-        for m in range(1, len(self.rho_P)):
+        for m in range(1, len(self.rho_P)): # reading from rho_u_SXXXX.dat (XXXX is either 1100 or 3160).
             self.rho_input = np.append(self.rho_input, float(self.rho_P[m][0]))
-            self.P_input = np.append(self.P_input, float(self.rho_P[m][1]) * 1e9)
+            self.P_input = np.append(self.P_input, float(self.rho_P[m][1]) * 1e9) #converting from GPa to Pa.
             self.U_input = np.append(self.U_input, float(self.rho_P[m][2]))
 
-        self.rho_P_function = interp1d(self.P_input, self.rho_input)
+        self.rho_P_function = interp1d(self.P_input, self.rho_input) # generating interpolation
         self.rho_U_function = interp1d(self.rho_input, self.U_input)
 
         self.theta_angle = None
@@ -93,18 +98,20 @@ class Model:
             print("Please choose an impact angle of 0, 30, 60 or 90 degrees!")
             sys.exit(1)
 
-
+    # mass-radius relationship (see Section S.1.1. in our paper)
     def __radius(self, mass):
         lnMM0 = np.log(mass / self.M0)
         gamma = self.a0 + self.a1 * lnMM0 + self.a2 * lnMM0 ** 2 + self.a3 * lnMM0 ** 3
         return self.R0 * (mass / self.M0) ** gamma
 
+    # Calculating a large Gamma(M). See Section S1.1. in our paper)
     def __gamma_calc(self, mass):
         lnMM0 = np.log(mass / self.M0)
         gamma = self.a0 + self.a1 * lnMM0 + self.a2 * lnMM0 ** 2 + self.a3 * lnMM0 ** 3
         return gamma
 
-    def __legendre(self, n, x):  # legendre polynomial functions, solutions to a legendre DE
+    # legendre polynomial functions, solutions to a legendre DE
+    def __legendre(self, n, x):
         if n == 0:
             return 1
         elif n == 1:
@@ -120,7 +127,8 @@ class Model:
         elif n == 6:
             return 1.0 / 8.0 * (231 * x ** 6.0 - 315 * x ** 4.0 + 105 * x ** 2.0 - 5)
 
-    def __Mantle_mass_model_highV(self, gamma, x):
+    # mantle mass model for a high velocity impact. See Equation (8)
+    def __Mantle_mass_model_highV(self, gamma, x): 
         y = 0.0
         num = 1.0
         if (x <= np.pi / 6.0):
@@ -130,8 +138,9 @@ class Model:
         elif (x <= np.pi / 2.0):
             y = gamma
         return y
-
-    def __create_model(self, theta, r, x):  # r is the radius, x is the angle
+    
+    # r is the radius, x is the angle for the Legendre formulation. See Equation (13)
+    def __create_model(self, theta, r, x): 
         y_model = 0.0
         k = 0
         for i in range(0, 5):
@@ -140,13 +149,15 @@ class Model:
                 k = k + 1
         return y_model
 
-    def __compute_density(self, P):
+    # pressure calculation. If an input pressure is smaller than 0, the minium density is returned
+    def __compute_density(self, P): 
         P = abs(P)
         if P < self.P_input[0]:
             return self.rho_input[0]
         else:
             return self.rho_P_function(P)
 
+    # internal energy calculation
     def __compute_internal_energy(self, rho):
         U = self.rho_U_function(rho)
         if U < 0.0:
@@ -154,6 +165,7 @@ class Model:
         else:
             return U
 
+    # given a planetary mass, this calculate density, internal energy, pressure, and mass as a function of planetary radius
     def __integrate_internal_energy(self, Mt):
         Rt = self.__radius(Mt)
         Rc = self.__compute_coreradius(Mt)
@@ -177,6 +189,7 @@ class Model:
 
         return u, P, rr / r, Rt
 
+    # compute pressure at radius = Rmelt
     def __compute_pressure(self, Mt, Rmelt):
         Rt = self.__radius(Mt)
         Rmelt = Rmelt * Rt
@@ -184,7 +197,7 @@ class Model:
         if Rmelt == 1.0:
             return 0.0
 
-        dr = (Rt - Rmelt) / 100.0  # random number
+        dr = (Rt - Rmelt) / 100.0  
 
         P = 0.0
         r = Rt
@@ -201,10 +214,11 @@ class Model:
         else:
             return P * 1e-9
 
+    # compute core radius
     def __compute_coreradius(self, Mt):
         Rt = self.__radius(Mt)
 
-        dr = Rt / 1000.0  # random number
+        dr = Rt / 1000.0  
 
         P = 0.0
         r = Rt
@@ -226,6 +240,7 @@ class Model:
         theta_G = 1 - np.sin(theta)
         return 2.43 * GammaG ** 2.0 * theta_G ** 2.5 - 0.0408 * GammaG + 1.86 * theta_G ** 2.50 + 1.08
 
+    # plotting results
     def plot_model(self, save=False):
         if self.theta_angle is None:
             print("Please run the model before plotting.")
@@ -238,18 +253,16 @@ class Model:
         ax[2] = fig1.add_subplot(223, adjustable='box', polar=True)
         ax[3] = fig1.add_subplot(224, adjustable='box', polar=True)
 
-        level2 = [int(self.latent_heat * 1e-5)]
+        level2 = [int(self.latent_heat * 1e-5)] # this shows a white contour line for panel a
         CS = ax[0].contourf(self.theta_angle, self.rr, self.du_gain, cmap=self.vik_map, vmin=5, vmax=20,
                             levels=self.levels)
         CS2 = ax[0].contour(CS, levels=level2, colors="white", linewidths=1, vmin=5, vmax=15)
-        # CS3=ax[1].contourf(theta_angle, rr, du_gain_melt, vmin=0, vmax=1.0,cmap='inferno')
         CS3 = ax[1].contourf(self.theta_angle, self.rr, self.du_gain_melt, vmin=0, vmax=1.0, cmap=plt.cm.inferno)
-
-        # you have to choose either of this to make the figure
         CS4 = ax[2].contourf(self.theta_angle, self.rr, self.du, cmap=self.turku_map, vmin=self.vmin_value,
                              vmax=self.vmax_value, levels=self.levels)
         CS6 = ax[3].contourf(self.theta_angle, self.rr, self.du_melt, vmin=0, vmax=1.0, cmap=plt.cm.inferno)
 
+        # setting for polar plots
         for i in range(0, len(ax)):
             ax[i].set_rmax(1.0)
             ax[i].set_rmin(0.0)
@@ -269,15 +282,15 @@ class Model:
 
         # color bars
         cNorm = mpl.colors.Normalize(vmin=5, vmax=20)
-        ax3 = fig1.add_axes([0.05, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
+        ax3 = fig1.add_axes([0.05, 0.05, 0.25, 0.015])  
         cb1 = mpl.colorbar.ColorbarBase(ax3, cmap=self.vik_map, norm=cNorm, orientation='horizontal')
 
         cNorm = mpl.colors.Normalize(vmin=self.vmin_value, vmax=self.vmax_value)
-        ax4 = fig1.add_axes([0.375, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
+        ax4 = fig1.add_axes([0.375, 0.05, 0.25, 0.015])  
         cb2 = mpl.colorbar.ColorbarBase(ax4, cmap=self.turku_map, norm=cNorm, orientation='horizontal')
 
         cNorm = mpl.colors.Normalize(vmin=0, vmax=1)
-        ax5 = fig1.add_axes([0.7, 0.05, 0.25, 0.015])  # left, bottom, width, height (range 0 to 1)
+        ax5 = fig1.add_axes([0.7, 0.05, 0.25, 0.015]) 
         cb3 = mpl.colorbar.ColorbarBase(ax5, cmap=plt.cm.inferno, norm=cNorm, orientation='horizontal')
 
         cb1.set_label('Internal Energy Gain ($10^5$ J/kg)')
@@ -324,27 +337,27 @@ class Model:
 
         # reading parameter coefficients for melt model
         parameter_list = [line.split() for line in open('parameter.txt')]
-        para0 = np.array(parameter_list[0][:]).astype(np.float)
-        para1 = np.array(parameter_list[1][:]).astype(np.float)
+        para0 = np.array(parameter_list[0][:]).astype(np.float) # parameters for vimp=vesc cases. See Table S.5
+        para1 = np.array(parameter_list[1][:]).astype(np.float) # parameters for vimp>1.1vesc cases. See Table S.6
 
-        critical_velocity = self.__v_cr((Mt - Mi) / (Mt + Mi), ang)
+        critical_velocity = self.__v_cr((Mt - Mi) / (Mt + Mi), ang) # critical velocity (Genda et al 2012). See equation 16 in our paper
 
         if self.vel <= critical_velocity:  # merging
             Mantle_mass_model = para0[10] * self.__legendre(0, np.cos(ang)) + para0[11] * self.__legendre(1,
-                                                                                                          np.cos(ang))
-            h_model = para0[0] * self.__legendre(0, ang) + para0[1] * self.__legendre(1, ang) + para0[
+                                                                                                          np.cos(ang)) # mantle mass fitting model at vimp=vesc. See Equation 7 
+            h_model = para0[0] * self.__legendre(0, ang) + para0[1] * self.__legendre(1, ang) + para0[ # mantle heating partitioning model at vimp=vesc. See Equation 6 (I have to fix this TO DO)
                 2] * self.__legendre(2, ang)  # fitting model
         else:  # no merging
-            Mantle_mass_model = self.__Mantle_mass_model_highV(targetmassfraction, ang)
-            h_model = para1[0] * self.__legendre(0, np.cos(ang)) + para1[1] * self.__legendre(1, np.cos(ang)) + para1[
+            Mantle_mass_model = self.__Mantle_mass_model_highV(targetmassfraction, ang) # mantle mass fitting model at vimp>1.1vesc. See Equation 8
+            h_model = para1[0] * self.__legendre(0, np.cos(ang)) + para1[1] * self.__legendre(1, np.cos(ang)) + para1[ #  mantle heating partitioning model at vimp>1.1vesc.  See Equation 6
                 2] * self.__legendre(2, np.cos(ang))  # fitting model
 
         if self.vel <= 1.0:
-            ee = para0[3:10]
+            ee = para0[3:10] # internal energy fitting model at vimp=vesc. See Equation 4 and Table S.5
         elif self.vel <= 1.1:
-            ee = para0[3:10] + (self.vel - 1.0) / 0.1 * (para1[3:10] - para0[3:10])
+            ee = para0[3:10] + (self.vel - 1.0) / 0.1 * (para1[3:10] - para0[3:10]) # internal energy fitting model at vesc<vimp<1.1vesc. See Section 4.1
         else:
-            ee = para1[3:10]
+            ee = para1[3:10] # internal energy fitting model at vimp>1.1vesc. See Equation 4 and Table S.6
 
         IE_model = ee[0] * self.__legendre(0, np.cos(ang)) + ee[1] * self.__legendre(1, np.cos(ang)) + ee[
             2] * self.__legendre(2, np.cos(ang)) + ee[
@@ -353,13 +366,14 @@ class Model:
                        6] * self.__legendre(6, np.cos(ang))  # internal energy model
 
         # computing the internal energy (Equation 3)
-        u_ave = h_model * IE_model * (dPE + dKE) / (0.70 * Mantle_mass_model * (Mt + Mi))
-        f_model = h_model * IE_model * (dPE + dKE) / (0.70 * Mantle_mass_model * (Mt + Mi)) / self.EM
+        u_ave = h_model * IE_model * (dPE + dKE) / (0.70 * Mantle_mass_model * (Mt + Mi)) # this is Delta U = Delta IE. See quation 10 and Section 3.2
+        f_model = h_model * IE_model * (dPE + dKE) / (0.70 * Mantle_mass_model * (Mt + Mi)) / self.EM # Mantle melt mass fraction. See Equation 9.
 
         if f_model > 1:
             f_model = 1.0
 
         # -- reading coefficients from coef.txt
+        # Heat distribution model within mantle. See equation 13 and Table S.7
         coef_read = [line.split() for line in open('coef.txt')]
         theta = np.zeros(shape=(len(coef_read), len(coef_read[1])))
 
@@ -373,25 +387,25 @@ class Model:
         Mplanet = Mantle_mass_model * (Mt + Mi)  # planetary mass
         rcore = self.__compute_coreradius(Mplanet)  # core radius
 
-        u, P, r, rplanet = self.__integrate_internal_energy(Mplanet)
+        u, P, r, rplanet = self.__integrate_internal_energy(Mplanet) # calculating internal energy, pressure as a function of planetary radial distance as well as planetary radius
 
-        r_U_function = interp1d(r, u)
-        r_P_function = interp1d(r, P)
+        r_U_function = interp1d(r, u) # making a function of the internal energy as a function of planetary radius
+        r_P_function = interp1d(r, P) # making a function of the pressure  as a function of planetary radius
 
         # grid spacing for calculating the magma ocean geometry
-        self.rr = np.linspace(rcore, 1.0, 30)
+        self.rr = np.linspace(rcore, 1.0, 30) # radial spacing - this value 30 can be changed to a different value depending on the radial resolution you need
 
-        self.theta_angle = np.linspace(-np.pi, np.pi, 60)
-        nt = int(len(self.theta_angle))
-        nr = int(len(self.rr))
+        self.theta_angle = np.linspace(-np.pi, np.pi, 60) # angle spacing (psi) - this value 60 can be changed to a different value depending on the angle resoultion you need 
+        nt = int(len(self.theta_angle)) # size of angle (psi) array
+        nr = int(len(self.rr)) # size of radius array
 
-        drr = (self.rr[1] - self.rr[0]) / self.rr[len(self.rr) - 1]
-        dangle = self.theta_angle[1] - self.theta_angle[0]
-        self.du = np.zeros(shape=(nr, nt))
-        self.du_gain = np.zeros(shape=(nr, nt))
+        drr = (self.rr[1] - self.rr[0]) / self.rr[len(self.rr) - 1] # radial grid size
+        dangle = self.theta_angle[1] - self.theta_angle[0] # angle grid size
+        self.du = np.zeros(shape=(nr, nt)) # internal energy
+        self.du_gain = np.zeros(shape=(nr, nt)) # internal energy gain
         number = np.zeros(shape=(nr, nt))
-        self.du_melt = np.zeros(shape=(nr, nt))
-        self.du_gain_melt = np.zeros(shape=(nr, nt))
+        self.du_melt = np.zeros(shape=(nr, nt)) # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
+        self.du_gain_melt = np.zeros(shape=(nr, nt))  # melt model w/o considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
         rmax_meltpool_model = 1.0  # magma ocean depth. 1.0: no magma ocean, 0.0: the entire mantle is molten
 
         # make the internal energy as a function of r
@@ -406,8 +420,8 @@ class Model:
 
         for m in range(0, nr):
             for n in range(0, nt):
-                du_initial = float(r_U_function(self.rr[m]))
-                du[m][n] = du[m][n] + du_initial
+                du_initial = float(r_U_function(self.rr[m])) # initial internal energy profile
+                du[m][n] = du[m][n] + du_initial # total internal energy
 
         for m in range(0, nr):
             for n in range(0, nt):
@@ -415,27 +429,27 @@ class Model:
                 Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0
 
                 if du[m][n] > Tmelt:
-                    self.du_melt[m][n] = 1.0
+                    self.du_melt[m][n] = 1.0 # this portion of the mantle is molten
                 else:
-                    self.du_melt[m][n] = 0.0
+                    self.du_melt[m][n] = 0.0 # this portion of the mantle is NOT molten
 
         meltV = 0.0  # melt volume
         totalV = 0.0  # total volume
 
         for m in range(0, nr):
             for n in range(0, nt):
-                dV = np.abs(np.pi * self.rr[m] ** 2.0 * np.sin(self.theta_angle[n]) * drr * dangle)
+                dV = np.abs(np.pi * self.rr[m] ** 2.0 * np.sin(self.theta_angle[n]) * drr * dangle) # calculating an incremental  volume at this radius and angle
                 totalV = totalV + dV
 
-                if du_gain[m][n] > self.latent_heat:
+                if du_gain[m][n] > self.latent_heat: # if du_gain is larger than latent heat 
                     meltV = meltV + dV
-                    self.du_gain_melt[m][n] = 1.0
+                    self.du_gain_melt[m][n] = 1.0 # this part is considered molten
 
                     # magma ocean depth is measured at psi = 0
-                    if rmax_meltpool_model > self.rr[m] and np.abs(self.theta_angle[n]) < np.pi / 6.0:
+                    if rmax_meltpool_model > self.rr[m] and np.abs(self.theta_angle[n]) < np.pi / 6.0: # actually this should be a bit smaller (TO DO)
                         rmax_meltpool_model = self.rr[m]
 
-        melt_model = meltV / totalV
+        melt_model = meltV / totalV # calculating melt volume
 
         # --- estimating the magma ocean depth and corresponding pressure
 
@@ -457,7 +471,7 @@ class Model:
         print("magma ocean depth and pressure for a conventional model: " + str(
             rplanet * 1e-3 * (1.0 - rmax_conventional_model)) + " km, " + str(Pmax_conventional_model) + " GPa")
 
-        self.du = du * 1e-5
+        self.du = du * 1e-5 # normalized by 10^5 J/kg
         self.du_gain = du_gain * 1e-5
 
         # --------
