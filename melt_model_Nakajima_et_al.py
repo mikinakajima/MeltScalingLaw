@@ -264,8 +264,8 @@ class Model:
         ax[1].text(np.pi / 5, 1.6, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
         ax[2].text(np.pi / 5, 1.6, '(c) Total Internal Energy', fontsize=15, color="black")
         ax[3].text(np.pi / 5, 1.6, '(d) Mantle Melt Mass Fraction', fontsize=15, color="black")
-        ax[2].text(np.pi / 2, 0.4, self.entropy0, fontsize=10, color="black")
-        ax[3].text(np.pi / 2, 0.4, self.entropy0, fontsize=10, color="black")
+        ax[2].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=10, color="black")
+        ax[3].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=10, color="black")
 
         # color bars
         cNorm = mpl.colors.Normalize(vmin=5, vmax=20)
