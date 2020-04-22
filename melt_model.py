@@ -352,6 +352,7 @@ class Model:
                 # mantle heating partitioning model at vimp>1.1vesc.  See Equation 6
                 2] * self.__legendre(2, np.cos(ang))  # fitting model
 
+        # recall that the impact velocity is normalized to the escape velocity
         if self.vel <= 1.0:
             ee = para0[3:10]  # internal energy fitting model at vimp=vesc. See Equation 4 and Table S.5
         elif self.vel <= 1.1:
