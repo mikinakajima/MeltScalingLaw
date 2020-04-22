@@ -99,6 +99,8 @@ Additional model parameters stored in `class Model` that are available for acces
 #### `Model.run_model()`
 
 No input parameters required. Runs the full series of impact-induced melting calculations with objects stored in the `Model` class.
+This function returns a dictionary object with numerical and model results.
+
 The calculation process is as follows:
 1. A check for correct user inputs is executed.
 2. The target and impactor masses are calculated.

@@ -307,6 +307,12 @@ class Model:
             fig1.savefig(self.outputfigurename)
 
     def run_model(self):
+
+        """
+
+        :return:
+        """
+
         self.check_model_integrity()
 
         Mt = self.Mt * self.Mmar  # recalculate target mass
@@ -485,5 +491,36 @@ class Model:
 
         self.du = du * 1e-5  # normalized by 10^5 J/kg
         self.du_gain = du_gain * 1e-5
+
+        self.du_gain = np.zeros(shape=(nr, nt))  # internal energy gain
+        number = np.zeros(shape=(nr, nt))
+        self.du_melt = np.zeros(shape=(nr,
+                                       nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
+        self.du_gain_melt = np.zeros(shape=(nr,
+                                            nt))  # melt model w/o considering the initial temperature profile.
+
+        d = {
+            "impact velocity": self.vel,
+            "impact angle": self.impact_angle,
+            "critical velocity": critical_velocity,
+            "planetary mass": Mplanet,
+            "core radius": rcore,
+            "max depth (global model) (km)": rplanet * 1e-3 * (1.0 - rmax_global_model),
+            "max pressure (global model)": Pmax_global_model,
+            "max depth (conventional model) (km)": rplanet * 1e-3 * (1.0 - rmax_conventional_model),
+            "max pressure (conventional model)": Pmax_conventional_model,
+            "max depth (melt pool model) (km)": rplanet * 1e-3 * (1.0 - rmax_meltpool_model),
+            "max pressure (melt pool model)": Pmax_meltpool_model,
+            "melt fraction": f_model,
+            "melt volume": meltV,
+            "total volume": totalV,
+            "internal energy": self.du,
+            "average internal energy": u_ave,
+            "internal energy gain": self.du_gain,
+            "internal energy of the melt (considering initial temperature profile)": self.du_melt,
+            "internal energy of the melt (not considering initial temperature profile)": self.du_gain_melt
+        }
+
+        return d
 
         # --------
