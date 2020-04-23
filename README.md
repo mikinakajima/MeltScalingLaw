@@ -1,10 +1,12 @@
 # Melt Scaling law 
 
-This is a scaling law described in Nakajima et al. in review. To use the scaling law, please take the following steps.
+This is a scaling law described in Nakajima et al. in review. The current version is found here:
+https://arxiv.org/abs/2004.04269
+
+To use the scaling law, please take the following steps.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 
@@ -131,5 +133,5 @@ Produces the plot shown above.
 ### Questions?
 
 If you have questions, please feel free to reach out to Miki Nakajima (mnakajima@rochester.edu). If you use this scaling law, please be sure to cite our paper, Nakajima et al., in review.
-
+https://arxiv.org/abs/2004.04269
 
