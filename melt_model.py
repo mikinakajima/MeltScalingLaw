@@ -19,9 +19,7 @@ class Model:
                  outputfigurename="output.eps", use_tex=False):
         self.Mmar = 6.39e23  # mass of Mars
         self.R0 = 1.5717e6  # impactor radius
-
         self.M0 = 6.39e22  # scaling coefficient
-
         self.a0 = 0.3412  # planetary mass-radius relationship
         self.a1 = -8.90e-3  # planetary mass-radius relationship
         self.a2 = 9.1442e-4  # planetary mass-radius relationship
@@ -514,13 +512,6 @@ class Model:
         self.du = du * 1e-5  # normalized by 10^5 J/kg
         self.du_gain = du_gain * 1e-5
 
-        #self.du_gain = np.zeros(shape=(nr, nt))  # internal energy gain
-        #number = np.zeros(shape=(nr, nt))
-        #self.du_melt = np.zeros(shape=(nr,
-        #                               nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
-        #self.du_gain_melt = np.zeros(shape=(nr,
-       #                                     nt))  # melt model w/o considering the initial temperature profile.
-
         d = {
             "impact velocity": self.vel,
             "impact angle": self.impact_angle,
@@ -544,10 +535,4 @@ class Model:
         }
 
         return d
-
-        # --------
-
-        #self.du_gain = du_gain * 1e-5
-
-        # --------
 
