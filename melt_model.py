@@ -547,7 +547,7 @@ class Model:
 
         # --------
 
-        self.du_gain = du_gain * 1e-5
+        #self.du_gain = du_gain * 1e-5
 
         # --------
 
