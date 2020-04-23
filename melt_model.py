@@ -519,7 +519,7 @@ class Model:
         #self.du_melt = np.zeros(shape=(nr,
         #                               nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
         #self.du_gain_melt = np.zeros(shape=(nr,
-                                            nt))  # melt model w/o considering the initial temperature profile.
+       #                                     nt))  # melt model w/o considering the initial temperature profile.
 
         d = {
             "impact velocity": self.vel,
