@@ -514,11 +514,11 @@ class Model:
         self.du = du * 1e-5  # normalized by 10^5 J/kg
         self.du_gain = du_gain * 1e-5
 
-        self.du_gain = np.zeros(shape=(nr, nt))  # internal energy gain
-        number = np.zeros(shape=(nr, nt))
-        self.du_melt = np.zeros(shape=(nr,
-                                       nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
-        self.du_gain_melt = np.zeros(shape=(nr,
+        #self.du_gain = np.zeros(shape=(nr, nt))  # internal energy gain
+        #number = np.zeros(shape=(nr, nt))
+        #self.du_melt = np.zeros(shape=(nr,
+        #                               nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
+        #self.du_gain_melt = np.zeros(shape=(nr,
                                             nt))  # melt model w/o considering the initial temperature profile.
 
         d = {
