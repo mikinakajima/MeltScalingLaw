@@ -499,7 +499,7 @@ class Model:
         rmax_global_model = (1.0 - meltV/(4.0/3.0*np.pi))**0.3333
         
         Pmax_global_model = self.__compute_pressure(Mplanet, rmax_global_model)
-
+        
         # assuming the conventional melt model (Eq 4)
         rmax_conventional_model = (1.0 - f_model * totalV/(4.0/3.0*np.pi))**0.3333
         
