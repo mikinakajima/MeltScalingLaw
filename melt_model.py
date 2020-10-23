@@ -450,6 +450,9 @@ class Model:
         du = self.du * u_ave
         du_gain = self.du_gain * u_ave
 
+        meltV = 0.0  # melt volume
+        totalV = 0.0  # total volume
+
         for m in range(0, nr):
             for n in range(0, nt):
                 du_initial = float(r_U_function(self.rr[m]))  # initial internal energy profile
@@ -458,49 +461,52 @@ class Model:
 
         for m in range(0, nr):
             for n in range(0, nt):
+                dV = np.abs(np.pi * self.rr[m] ** 2.0 * np.sin(
+                    self.theta_angle[n]) * drr * dangle)  # calculating an incremental  volume at this radius and angle
+                totalV = totalV + dV
+                
                 Press = r_P_function(self.rr[m])
                 Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0
 
                 if du[m][n] > Tmelt:
                     self.du_melt[m][n] = 1.0  # this portion of the mantle is molten
-                else:
-                    self.du_melt[m][n] = 0.0  # this portion of the mantle is NOT molten
-
-
-        meltV = 0.0  # melt volume
-        totalV = 0.0  # total volume
-
-        for m in range(0, nr):
-            for n in range(0, nt):
-                dV = np.abs(np.pi * self.rr[m] ** 2.0 * np.sin(
-                    self.theta_angle[n]) * drr * dangle)  # calculating an incremental  volume at this radius and angle
-                totalV = totalV + dV
-
-                if du_gain[m][n] > self.latent_heat:  # if du_gain is larger than latent heat
                     meltV = meltV + dV
-                    self.du_gain_melt[m][n] = 1.0  # this part is considered molten
-
-                    # magma ocean depth is measured at psi = 0
                     if rmax_meltpool_model > self.rr[m] and np.abs(
                             self.theta_angle[n]) < np.pi / 6.0:  # actually this should be a bit smaller (TO DO)
                         rmax_meltpool_model = self.rr[m]
 
+                else:
+                    self.du_melt[m][n] = 0.0  # this portion of the mantle is NOT molten
+
+
+
+
+        for m in range(0, nr):
+            for n in range(0, nt):
+
+                if du_gain[m][n] > self.latent_heat:  # if du_gain is larger than latent heat
+                    self.du_gain_melt[m][n] = 1.0  # this part is considered molten
+
+
         melt_model = meltV / totalV  # calculating melt volume
-
-
+        
         # --- estimating the magma ocean depth and corresponding pressure
 
         # rmax_meltpool_model = max(rcore, rmax_meltpool_model)
         Pmax_meltpool_model = self.__compute_pressure(Mplanet, rmax_meltpool_model)
 
         # assuming the same melt volume as the melt pool
-        rmax_global_model = (1.0 - meltV / totalV * (1.0 - rcore ** 3.0)) ** 0.333
+        rmax_global_model = (1.0 - meltV/(4.0/3.0*np.pi))**0.3333
+        
         Pmax_global_model = self.__compute_pressure(Mplanet, rmax_global_model)
 
         # assuming the conventional melt model (Eq 4)
-        rmax_conventional_model = (1.0 - f_model * (1.0 - rcore ** 3.0)) ** 0.333
+        rmax_conventional_model = (1.0 - f_model * totalV/(4.0/3.0*np.pi))**0.3333
+        
         Pmax_conventional_model = self.__compute_pressure(Mplanet, rmax_conventional_model)
 
+        print("planetary radius: " + str(rplanet * 1e-3) + " km")
+        print("mantle depth: " + str(rplanet*(1.0-rcore) * 1e-3) + " km")
         print("magma ocean depth and pressure for a melt pool model: " + str(
             rplanet * 1e-3 * (1.0 - rmax_meltpool_model)) + " km, " + str(Pmax_meltpool_model) + " GPa")
         print("magma ocean depth and pressure for a global magma ocean model: " + str(
