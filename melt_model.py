@@ -479,8 +479,6 @@ class Model:
                     self.du_melt[m][n] = 0.0  # this portion of the mantle is NOT molten
 
 
-
-
         for m in range(0, nr):
             for n in range(0, nt):
 
