@@ -466,7 +466,15 @@ class Model:
                 totalV = totalV + dV
                 
                 Press = r_P_function(self.rr[m])
-                Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0
+                #Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0 #Solomatov & Stevenson model. 1000 represents Cv
+
+		if Press*1e-9 < 24.0: #Rubie et al., (2015) melt model
+		    Tmelt = (1874.0 + 55.43 * Press * 1e-9 - 1.74 * (Press * 1e-9)**2.0  + 0.0193 *  (Press * 1e-9)**3.0) * 1000.0 
+                else:    
+		    Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.011 *  (Press * 1e-9)**3.0) * 1000.0 
+                    
+                    
+
 
                 if du[m][n] > Tmelt:
                     self.du_melt[m][n] = 1.0  # this portion of the mantle is molten
