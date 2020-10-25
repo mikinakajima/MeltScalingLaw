@@ -363,21 +363,15 @@ class Model:
             h_model = para0[0] * self.__legendre(0, np.cos(ang)) + para0[1] * self.__legendre(1, np.cos(ang)) + para0[
                 # mantle heating partitioning model at vimp=vesc. See Equation 6 
                 2] * self.__legendre(2, np.cos(ang))  # fitting model
+            ee = para0[3:10] 
         else:  # no merging
             Mantle_mass_model = self.__Mantle_mass_model_highV(targetmassfraction,
                                                                ang)  # mantle mass fitting model at vimp>1.1vesc. See Equation 8
             h_model = para1[0] * self.__legendre(0, np.cos(ang)) + para1[1] * self.__legendre(1, np.cos(ang)) + para1[
                 # mantle heating partitioning model at vimp>1.1vesc.  See Equation 6
                 2] * self.__legendre(2, np.cos(ang))  # fitting model
+            ee = para1[3:10]
 
-        # recall that the impact velocity is normalized to the escape velocity
-        if self.vel <= 1.0:
-            ee = para0[3:10]  # internal energy fitting model at vimp=vesc. See Equation 4 and Table S.5
-        elif self.vel <= 1.1:
-            ee = para0[3:10] + (self.vel - 1.0) / 0.1 * (para1[3:10] - para0[
-                                                                       3:10])  # internal energy fitting model at vesc<vimp<1.1vesc. See Section 4.1
-        else:
-            ee = para1[3:10]  # internal energy fitting model at vimp>1.1vesc. See Equation 4 and Table S.6
 
 
         IE_model = ee[0] * self.__legendre(0, np.cos(ang)) + ee[1] * self.__legendre(1, np.cos(ang)) + ee[
@@ -513,6 +507,7 @@ class Model:
 
         print("planetary radius: " + str(rplanet * 1e-3) + " km")
         print("mantle depth: " + str(rplanet*(1.0-rcore) * 1e-3) + " km")
+        print("mantle volume fraction: " + str(melt_model))        
         print("magma ocean depth and pressure for a melt pool model: " + str(
             rplanet * 1e-3 * (1.0 - rmax_meltpool_model)) + " km, " + str(Pmax_meltpool_model) + " GPa")
         print("magma ocean depth and pressure for a global magma ocean model: " + str(
