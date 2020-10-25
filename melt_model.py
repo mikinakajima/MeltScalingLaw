@@ -357,12 +357,12 @@ class Model:
                                         ang)  # critical velocity (Genda et al 2012). See equation 16 in our paper
 
         if self.vel <= critical_velocity:  # merging
-            Mantle_mass_model = para0[10] * self.__legendre(0, np.cos(ang)) + para0[11] * self.__legendre(1,
-                                                                                                          np.cos(
-                                                                                                              ang))  # mantle mass fitting model at vimp=vesc. See Equation 7
-            h_model = para0[0] * self.__legendre(0, ang) + para0[1] * self.__legendre(1, ang) + para0[
-                # mantle heating partitioning model at vimp=vesc. See Equation 6 (I have to fix this TO DO)
-                2] * self.__legendre(2, ang)  # fitting model
+            Mantle_mass_model = para0[10] * self.__legendre(0, np.cos(ang)) + para0[11] * self.__legendre(1, np.cos(ang))
+            # mantle mass fitting model at vimp=vesc. See Equation 7
+            
+            h_model = para0[0] * self.__legendre(0, np.cos(ang)) + para0[1] * self.__legendre(1, np.cos(ang)) + para0[
+                # mantle heating partitioning model at vimp=vesc. See Equation 6 
+                2] * self.__legendre(2, np.cos(ang))  # fitting model
         else:  # no merging
             Mantle_mass_model = self.__Mantle_mass_model_highV(targetmassfraction,
                                                                ang)  # mantle mass fitting model at vimp>1.1vesc. See Equation 8
