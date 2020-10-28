@@ -353,6 +353,20 @@ class Model:
         para0 = np.array(parameter_list[0][:]).astype(np.float)  # parameters for vimp=vesc cases. See Table S.5
         para1 = np.array(parameter_list[1][:]).astype(np.float)  # parameters for vimp>1.1vesc cases. See Table S.6
 
+
+        # reading all the error information
+        error_read = [line.split() for line in open('Model_sigma.txt')]
+        sigma0 = np.zeros(shape=(3, 4))
+        sigma1 = np.zeros(shape=(3, 4))
+        Fsigma = np.zeros(4)
+        
+        for m in range(0, 3):
+            for n in range(0, 4):
+                sigma0[m][n] = float(error_read[m+1][n])
+                sigma1[m][n] = float(error_read[m+4][n])
+        for n in range(0,4):
+            Fsigma[n] =  float(error_read[7][n])
+        
         critical_velocity = self.__v_cr((Mt - Mi) / (Mt + Mi),
                                         ang)  # critical velocity (Genda et al 2012). See equation 16 in our paper
 
@@ -386,6 +400,13 @@ class Model:
         f_model = h_model * IE_model * (dPE + dKE) / (
                     0.70 * Mantle_mass_model * (Mt + Mi)) / self.EM  # Mantle melt mass fraction. See Equation 9.
 
+        angle_index = int(self.impact_angle/30) # determing 
+
+        dz = np.sqrt((sigma0[0][angle_index]/IE_model)**2.0 +  (sigma0[1][angle_index]/h_model)**2.0  +  (sigma0[2][angle_index]/Mantle_mass_model)**2.0)
+        u_ave_std =  u_ave  * dz
+        f_model_std = f_model * dz
+    
+
 
         if f_model > 1:
             f_model = 1.0
@@ -399,6 +420,7 @@ class Model:
             for n in range(0, len(coef_read[1])):
                 theta[m][n] = float(coef_read[m][n])
         # -------------
+
 
         melt_model = np.zeros(4)
 
@@ -423,6 +445,7 @@ class Model:
         drr = (self.rr[1] - self.rr[0]) / self.rr[len(self.rr) - 1]  # radial grid size
         dangle = self.theta_angle[1] - self.theta_angle[0]  # angle grid size
         self.du = np.zeros(shape=(nr, nt))  # internal energy
+        self.du_sd = np.zeros(shape=(nr, nt))  # internal energy
         self.du_gain = np.zeros(shape=(nr, nt))  # internal energy gain
         number = np.zeros(shape=(nr, nt))
         self.du_melt = np.zeros(shape=(nr,
@@ -430,10 +453,13 @@ class Model:
         self.du_gain_melt = np.zeros(shape=(nr,
                                             nt))  # melt model w/o considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
 
+        
+
         rmax_meltpool_model = 1.0  # magma ocean depth. 1.0: no magma ocean, 0.0: the entire mantle is molten
-
-        # make the internal energy as a function of r
-
+        rmax_meltpool_model_max_sd = 1.0
+        rmax_meltpool_model_min_sd = 1.0   
+        
+        # make the internal energy as a function of r        
         for m in range(0, nr):
             for n in range(0, nt):
                 self.du[m][n] = self.__create_model(theta[self.impact_angle_choices.index(ang / np.pi * 180)],
@@ -441,17 +467,32 @@ class Model:
 
                 self.du_gain[m][n] = self.du[m][n]
 
+
+        # error estimate
+        for m in range(0, nr):
+            for n in range(0, nt):
+                self.du_sd[m][n] =  self.du[m][n] * np.sqrt(dz**2.0 + (Fsigma[angle_index]/self.du[m][n])**2.0) 
+            
+                
         du = self.du * u_ave
         du_gain = self.du_gain * u_ave
+        du_sd = self.du_sd * u_ave
+        du_max_sd  = np.zeros(shape=(nr, nt)) 
+        du_min_sd  = np.zeros(shape=(nr, nt)) 
+        
 
         meltV = 0.0  # melt volume
         totalV = 0.0  # total volume
+        meltV_max_sd = 0.0
+        meltV_min_sd = 0.0
 
+        
         for m in range(0, nr):
             for n in range(0, nt):
                 du_initial = float(r_U_function(self.rr[m]))  # initial internal energy profile
                 du[m][n] = du[m][n] + du_initial  # total internal energy
-
+                du_max_sd[m][n] =  du[m][n] +  du_sd[m][n] # + sigma
+                du_min_sd[m][n] =  du[m][n] -  du_sd[m][n] # - sigma  
 
         for m in range(0, nr):
             for n in range(0, nt):
@@ -462,23 +503,36 @@ class Model:
                 Press = r_P_function(self.rr[m])
                 #Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0 #Solomatov & Stevenson model. 1000 represents Cv
 
-		if Press*1e-9 < 24.0: #Rubie et al., (2015) melt model
-			Tmelt = (1874.0 + 55.43 * Press * 1e-9 - 1.74 * (Press * 1e-9)**2.0  + 0.0193 *  (Press * 1e-9)**3.0) * 1000.0 
+                if Press*1e-9 < 24.0: #Rubie et al., (2015) melt model
+                    Tmelt = (1874.0 + 55.43 * Press * 1e-9 - 1.74 * (Press * 1e-9)**2.0  + 0.0193 * (Press * 1e-9)**3.0) * 1000.0
                 else:    
-			Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.011 *  (Press * 1e-9)**3.0) * 1000.0 
-                    
+                    Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.011 * (Press * 1e-9)**3.0) * 1000.0 
                     
 
-
+                
+                # the best case scenario
                 if du[m][n] > Tmelt:
                     self.du_melt[m][n] = 1.0  # this portion of the mantle is molten
                     meltV = meltV + dV
                     if rmax_meltpool_model > self.rr[m] and np.abs(
                             self.theta_angle[n]) < np.pi / 6.0:  # actually this should be a bit smaller (TO DO)
                         rmax_meltpool_model = self.rr[m]
-
                 else:
                     self.du_melt[m][n] = 0.0  # this portion of the mantle is NOT molten
+
+                # + sigma
+                if du_max_sd[m][n] > Tmelt:
+                    meltV_max_sd =  meltV_max_sd  + dV
+                    if rmax_meltpool_model_max_sd > self.rr[m] and np.abs(
+                            self.theta_angle[n]) < np.pi / 6.0:  
+                        rmax_meltpool_model_max_sd = self.rr[m]
+
+                # - sigma
+                if du_min_sd[m][n] > Tmelt:
+                    meltV_min_sd =  meltV_min_sd  + dV
+                    if rmax_meltpool_model_min_sd > self.rr[m] and np.abs(
+                            self.theta_angle[n]) < np.pi / 6.0:  
+                        rmax_meltpool_model_min_sd = self.rr[m]
 
                     
         for m in range(0, nr):
@@ -489,31 +543,61 @@ class Model:
 
 
         melt_model = meltV / totalV  # calculating melt volume
+        melt_model_max_sd =  meltV_max_sd / totalV
+        melt_model_min_sd =  meltV_min_sd / totalV        
         
         # --- estimating the magma ocean depth and corresponding pressure
 
         # rmax_meltpool_model = max(rcore, rmax_meltpool_model)
         Pmax_meltpool_model = self.__compute_pressure(Mplanet, rmax_meltpool_model)
-
+        Pmax_meltpool_model_max_sd = self.__compute_pressure(Mplanet, rmax_meltpool_model_max_sd)
+        Pmax_meltpool_model_min_sd = self.__compute_pressure(Mplanet, rmax_meltpool_model_min_sd)        
+        
         # assuming the same melt volume as the melt pool
         rmax_global_model = (1.0 - meltV/(4.0/3.0*np.pi))**0.3333
+        rmax_global_model_max_sd = (1.0 - meltV_max_sd/(4.0/3.0*np.pi))**0.3333
+        rmax_global_model_min_sd = (1.0 - meltV_min_sd/(4.0/3.0*np.pi))**0.3333
         
         Pmax_global_model = self.__compute_pressure(Mplanet, rmax_global_model)
+        Pmax_global_model_max_sd = self.__compute_pressure(Mplanet, rmax_global_model_max_sd)
+        Pmax_global_model_min_sd = self.__compute_pressure(Mplanet, rmax_global_model_min_sd)        
         
         # assuming the conventional melt model (Eq 4)
         rmax_conventional_model = (1.0 - f_model * totalV/(4.0/3.0*np.pi))**0.3333
+        rmax_conventional_model_max_sd = (1.0 - (f_model + f_model_std) * totalV/(4.0/3.0*np.pi))**0.3333
+        rmax_conventional_model_min_sd = (1.0 - (f_model - f_model_std) * totalV/(4.0/3.0*np.pi))**0.3333        
         
         Pmax_conventional_model = self.__compute_pressure(Mplanet, rmax_conventional_model)
+        Pmax_conventional_model_max_sd = self.__compute_pressure(Mplanet, rmax_conventional_model_max_sd)
+        Pmax_conventional_model_min_sd = self.__compute_pressure(Mplanet, rmax_conventional_model_min_sd)
 
-        print("planetary radius: " + str(rplanet * 1e-3) + " km")
-        print("mantle depth: " + str(rplanet*(1.0-rcore) * 1e-3) + " km")
-        print("mantle volume fraction: " + str(melt_model))        
-        print("magma ocean depth and pressure for a melt pool model: " + str(
-            rplanet * 1e-3 * (1.0 - rmax_meltpool_model)) + " km, " + str(Pmax_meltpool_model) + " GPa")
-        print("magma ocean depth and pressure for a global magma ocean model: " + str(
-            rplanet * 1e-3 * (1.0 - rmax_global_model)) + " km, " + str(Pmax_global_model) + " GPa")
-        print("magma ocean depth and pressure for a conventional model: " + str(
-            rplanet * 1e-3 * (1.0 - rmax_conventional_model)) + " km, " + str(Pmax_conventional_model) + " GPa")
+        print("planetary radius: " +  str(float("{0:.2f}".format(rplanet * 1e-3))) + " km")
+        print("mantle depth: " +  str(float("{0:.2f}".format(rplanet*(1.0-rcore) * 1e-3))) + " km")
+        print("mantle volume fraction: " +  str(float("{0:.2f}".format(melt_model)))
+              + ' (+' + str(float("{0:.2f}".format(melt_model_max_sd-melt_model)))
+              + ', -' + str(float("{0:.2f}".format(melt_model-melt_model_min_sd)))
+              + ')')        
+        print("magma ocean depth and pressure for a melt pool model: " + str(float("{0:.2f}".format(rplanet * 1e-3 * (1.0 - rmax_meltpool_model))))
+              + "(+" +  str(float("{0:.2f}".format(rplanet * 1e-3 * (- rmax_meltpool_model_max_sd + rmax_meltpool_model))))
+              + ", -" +  str(float("{0:.2f}".format(rplanet * 1e-3 * (rmax_meltpool_model_min_sd - rmax_meltpool_model)))) 
+              + ") km, "
+              +  str(float("{0:.2f}".format(Pmax_meltpool_model))) + "(+" +  str(float("{0:.2f}".format(Pmax_meltpool_model_max_sd-Pmax_meltpool_model))) +', -' +  str(float("{0:.2f}".format(Pmax_meltpool_model-Pmax_meltpool_model_min_sd))) + ") GPa")
+        
+        print("magma ocean depth and pressure for a global magma ocean model: " +  str(float("{0:.2f}".format(
+            rplanet * 1e-3 * (1.0 - rmax_global_model))))
+              + "(+" +  str(float("{0:.2f}".format(rplanet * 1e-3 *  (-rmax_global_model_max_sd + rmax_global_model))))
+              + ", -" +  str(float("{0:.2f}".format(rplanet * 1e-3 *  (rmax_global_model_min_sd - rmax_global_model))))               
+              + ") km, "
+              +  str(float("{0:.2f}".format(Pmax_global_model))) + "(+" +  str(float("{0:.2f}".format(Pmax_global_model_max_sd-Pmax_global_model))) +', -' +  str(float("{0:.2f}".format(Pmax_global_model-Pmax_global_model_min_sd))) + ") GPa")
+
+
+        
+        print("magma ocean depth and pressure for a conventional model: " +  str(float("{0:.2f}".format(
+            rplanet * 1e-3 * (1.0 - rmax_conventional_model))))
+              + "(+" +  str(float("{0:.2f}".format(rplanet * 1e-3 * (- rmax_conventional_model_max_sd + rmax_conventional_model))))
+              + ", -" +  str(float("{0:.2f}".format(rplanet * 1e-3 * (rmax_conventional_model_min_sd - rmax_conventional_model)))) 
+              + ") km, "
+              +  str(float("{0:.2f}".format(Pmax_conventional_model))) + "(+" +  str(float("{0:.2f}".format(Pmax_conventional_model_max_sd-Pmax_conventional_model))) +', -' +  str(float("{0:.2f}".format(Pmax_conventional_model-Pmax_conventional_model_min_sd))) + ") GPa")
 
 
         self.du = du * 1e-5  # normalized by 10^5 J/kg
