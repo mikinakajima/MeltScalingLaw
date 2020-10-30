@@ -406,8 +406,6 @@ class Model:
         f_model_std = f_model * dz
     
 
-	print(u_ave)
-
 
         if f_model > 1:
             f_model = 1.0
