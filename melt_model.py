@@ -10,14 +10,13 @@ import matplotlib as mpl
 from scipy.interpolate import interp1d
 
 # TODO
-# fix h model
 # magma ocean depth is fixed at psi = 0
 
 class Model:
 
     def __init__(self, Mtotal=2.0, gamma=0.5, vel=2.0, entropy0=1100, impact_angle=90,
                  outputfigurename="output.eps", use_tex=False):
-        self.Mmar = 6.39e23  # mass of Mars
+        self.Mmar = 6.4171e23  # mass of Mars
         self.R0 = 1.5717e6  # impactor radius
         self.M0 = 6.39e22  # scaling coefficient
         self.a0 = 0.3412  # planetary mass-radius relationship
@@ -406,6 +405,8 @@ class Model:
         u_ave_std =  u_ave  * dz
         f_model_std = f_model * dz
     
+
+	print(u_ave)
 
 
         if f_model > 1:
