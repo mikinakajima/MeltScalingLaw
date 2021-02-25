@@ -9,6 +9,10 @@ from matplotlib import rc
 import matplotlib as mpl
 from scipy.interpolate import interp1d
 
+
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+
 # TODO
 # magma ocean depth is fixed at psi = 0
 
@@ -276,10 +280,10 @@ class Model:
 
         ax[0].text(np.pi / 5, 1.6, '(a) Internal Energy Gain', fontsize=15, color="black")
         ax[1].text(np.pi / 5, 1.6, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
-        ax[2].text(np.pi / 5, 1.6, '(c) Total Internal Energy', fontsize=15, color="black")
-        ax[3].text(np.pi / 5, 1.6, '(d) Mantle Melt Mass Fraction', fontsize=15, color="black")
-        ax[2].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=10, color="black")
-        ax[3].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=10, color="black")
+        ax[2].text(np.pi / 5, 1.6, '(a) Total Internal Energy', fontsize=15, color="black")
+        ax[3].text(np.pi / 5, 1.6, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
+        ax[2].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=15, color="black")
+        ax[3].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=15, color="black")
 
         # color bars
         cNorm = mpl.colors.Normalize(vmin=5, vmax=20)
@@ -309,8 +313,8 @@ class Model:
 
         fig1.subplots_adjust(left=left, bottom=bottom, right=right, top=top, wspace=wspace, hspace=hspace)
 
-        plt.show()
-        plt.close()
+        #plt.show()
+        #plt.close()
 
         if save:
             fig1.savefig(self.outputfigurename)
@@ -369,6 +373,7 @@ class Model:
         critical_velocity = self.__v_cr((Mt - Mi) / (Mt + Mi),
                                         ang)  # critical velocity (Genda et al 2012). See equation 16 in our paper
 
+
         if self.vel <= critical_velocity:  # merging
             Mantle_mass_model = para0[10] * self.__legendre(0, np.cos(ang)) + para0[11] * self.__legendre(1, np.cos(ang))
             # mantle mass fitting model at vimp=vesc. See Equation 7
@@ -378,13 +383,14 @@ class Model:
                 2] * self.__legendre(2, np.cos(ang))  # fitting model
             ee = para0[3:10] 
         else:  # no merging
-            Mantle_mass_model = self.__Mantle_mass_model_highV(targetmassfraction,
-                                                               ang)  # mantle mass fitting model at vimp>1.1vesc. See Equation 8
+            Mantle_mass_model = Mt/(Mi + Mt)
             h_model = para1[0] * self.__legendre(0, np.cos(ang)) + para1[1] * self.__legendre(1, np.cos(ang)) + para1[
                 # mantle heating partitioning model at vimp>1.1vesc.  See Equation 6
                 2] * self.__legendre(2, np.cos(ang))  # fitting model
             ee = para1[3:10]
 
+
+            
 
 
         IE_model = ee[0] * self.__legendre(0, np.cos(ang)) + ee[1] * self.__legendre(1, np.cos(ang)) + ee[
@@ -500,6 +506,7 @@ class Model:
                 totalV = totalV + dV
                 
                 Press = r_P_function(self.rr[m])
+                
                 #Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0 #Solomatov & Stevenson model. 1000 represents Cv
 
                 if Press*1e-9 < 24.0: #Rubie et al., (2015) melt model
@@ -553,18 +560,24 @@ class Model:
         Pmax_meltpool_model_min_sd = self.__compute_pressure(Mplanet, rmax_meltpool_model_min_sd)        
         
         # assuming the same melt volume as the melt pool
-        rmax_global_model = (1.0 - meltV/(4.0/3.0*np.pi))**0.3333
-        rmax_global_model_max_sd = (1.0 - meltV_max_sd/(4.0/3.0*np.pi))**0.3333
-        rmax_global_model_min_sd = (1.0 - meltV_min_sd/(4.0/3.0*np.pi))**0.3333
+        rmax_global_model = max(rcore, (1.0 - meltV/(4.0/3.0*np.pi))**0.3333)
+        rmax_global_model_max_sd = max(rcore, (1.0 - meltV_max_sd/(4.0/3.0*np.pi))**0.3333)
+        rmax_global_model_min_sd = max(rcore, (1.0 - meltV_min_sd/(4.0/3.0*np.pi))**0.3333)
+
         
         Pmax_global_model = self.__compute_pressure(Mplanet, rmax_global_model)
         Pmax_global_model_max_sd = self.__compute_pressure(Mplanet, rmax_global_model_max_sd)
         Pmax_global_model_min_sd = self.__compute_pressure(Mplanet, rmax_global_model_min_sd)        
+
+
+        Pcmb = self.__compute_pressure(Mplanet, rcore)
+
         
         # assuming the conventional melt model (Eq 4)
-        rmax_conventional_model = (1.0 - f_model * totalV/(4.0/3.0*np.pi))**0.3333
-        rmax_conventional_model_max_sd = (1.0 - (f_model + f_model_std) * totalV/(4.0/3.0*np.pi))**0.3333
-        rmax_conventional_model_min_sd = (1.0 - (f_model - f_model_std) * totalV/(4.0/3.0*np.pi))**0.3333        
+
+        rmax_conventional_model = max(rcore, (1.0 - f_model * totalV/(4.0/3.0*np.pi))**0.3333)
+        rmax_conventional_model_max_sd = max(rcore, (1.0 - min(1.0,(f_model + f_model_std)) * totalV/(4.0/3.0*np.pi))**0.3333)
+        rmax_conventional_model_min_sd = max(rcore, (1.0 - max(0.0,(f_model - f_model_std)) * totalV/(4.0/3.0*np.pi))**0.3333)
         
         Pmax_conventional_model = self.__compute_pressure(Mplanet, rmax_conventional_model)
         Pmax_conventional_model_max_sd = self.__compute_pressure(Mplanet, rmax_conventional_model_max_sd)
@@ -588,8 +601,6 @@ class Model:
               + ", -" +  str(float("{0:.2f}".format(rplanet * 1e-3 *  (rmax_global_model_min_sd - rmax_global_model))))               
               + ") km, "
               +  str(float("{0:.2f}".format(Pmax_global_model))) + "(+" +  str(float("{0:.2f}".format(Pmax_global_model_max_sd-Pmax_global_model))) +', -' +  str(float("{0:.2f}".format(Pmax_global_model-Pmax_global_model_min_sd))) + ") GPa")
-
-
         
         print("magma ocean depth and pressure for a conventional model: " +  str(float("{0:.2f}".format(
             rplanet * 1e-3 * (1.0 - rmax_conventional_model))))
@@ -609,19 +620,24 @@ class Model:
             "planetary mass": Mplanet,
             "core radius": rcore,
             "max depth (global model) (km)": rplanet * 1e-3 * (1.0 - rmax_global_model),
-            "max pressure (global model)": Pmax_global_model,
+            "max pressure (global model)": [Pmax_global_model,Pmax_global_model_max_sd-Pmax_global_model, -(Pmax_global_model-Pmax_global_model_min_sd)],         
             "max depth (conventional model) (km)": rplanet * 1e-3 * (1.0 - rmax_conventional_model),
-            "max pressure (conventional model)": Pmax_conventional_model,
+            "max pressure (conventional model)": [Pmax_conventional_model, Pmax_conventional_model_max_sd-Pmax_conventional_model, -(Pmax_conventional_model-Pmax_conventional_model_min_sd)],
             "max depth (melt pool model) (km)": rplanet * 1e-3 * (1.0 - rmax_meltpool_model),
-            "max pressure (melt pool model)": Pmax_meltpool_model,
+            "max pressure (melt pool model)": [Pmax_meltpool_model, Pmax_meltpool_model_max_sd-Pmax_meltpool_model, -(Pmax_meltpool_model-Pmax_meltpool_model_min_sd)],            
             "melt fraction": f_model,
-            "melt volume": meltV,
+            "rmax conventional" : rmax_conventional_model, 
+            "melt model": meltV/totalV,
+            "core mantle boundary pressure": Pcmb,
             "total volume": totalV,
             "internal energy": self.du,
             "average internal energy": u_ave,
             "internal energy gain": self.du_gain,
             "internal energy of the melt (considering initial temperature profile)": self.du_melt,
-            "internal energy of the melt (not considering initial temperature profile)": self.du_gain_melt
+            "internal energy of the melt (not considering initial temperature profile)": self.du_gain_melt,
+            "normalized depth (melt pool model)": [1.0-rmax_meltpool_model, rmax_meltpool_model_min_sd - rmax_meltpool_model,  rmax_meltpool_model_max_sd -rmax_meltpool_model],            
+            "normalized depth (global model)": [1.0 - rmax_global_model, rmax_global_model_min_sd - rmax_global_model,  rmax_global_model_max_sd -rmax_global_model],
+            "normalized depth (conventional model)": [1.0 - rmax_conventional_model,rmax_conventional_model_min_sd - rmax_conventional_model,  rmax_conventional_model_max_sd -rmax_conventional_model],            
         }
 
         return d
