@@ -1,7 +1,8 @@
 # Melt Scaling law 
 
-This is a scaling law described in Nakajima et al. in review. The current version is found here:
-https://arxiv.org/abs/2004.04269
+This is a scaling law described in 
+
+Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, H. J., Jacobson, S. A., Manske, L., Hull, S. D. 2021. Scaling laws for the geometry of an impact-induced magma ocean. Earth and Planetary Science Letters, 568, 116983 [link]
 
 To use the scaling law, please take the following steps.
 
