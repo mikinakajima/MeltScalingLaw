@@ -135,6 +135,6 @@ Produces the plot shown above.
 
 If you have questions, please feel free to reach out to Miki Nakajima (mnakajima@rochester.edu). If you use this scaling law, please be sure to cite our paper, Nakajima et al., 2021. 
 
-Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, H. J., Jacobson, S. A., Manske, L., Hull, S. D. 2021. Scaling laws for the geometry of an impact-induced magma ocean. Earth and Planetary Science Letters, 568, 116983 [(link)] (https://www.sciencedirect.com/science/article/pii/S0012821X21002429)
+Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, H. J., Jacobson, S. A., Manske, L., Hull, S. D. 2021. Scaling laws for the geometry of an impact-induced magma ocean. Earth and Planetary Science Letters, 568, 116983 [(link)](https://www.sciencedirect.com/science/article/pii/S0012821X21002429)
 
 
