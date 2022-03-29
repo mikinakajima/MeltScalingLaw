@@ -13,7 +13,7 @@ from scipy.interpolate import interp1d
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
-# TODO
+# TODO - error with vlarge is not quite right
 # magma ocean depth is fixed at psi = 0
 
 class Model:
@@ -28,7 +28,7 @@ class Model:
         self.a2 = 9.1442e-4  # planetary mass-radius relationship
         self.a3 = -7.4332e-5  # planetary mass-radius relationship
         self.GG = 6.67408e-11  # gravitational constant
-        self.impact_angle_choices = [0.0, 30.0, 60.0, 90.0]  # choice of impact angle
+        self.impact_angle_choices = [0.0, 30.0, 45.0, 60.0, 90.0]  # choice of impact angle
 
         self.impact_angle = float(impact_angle)  # impactor impact angle with target
 
@@ -64,9 +64,9 @@ class Model:
         self.rho_P = [line.split() for line in open(
             self.entropyfile)]  # relationship between rho-P assuming S0=3160 J/K/kg. We also assume that rho-P structure is the same at S0=1100 J/K/kg.
 
-        self.levels = np.arange(-2, 100, 2)
-        self.vmin_value = 5
-        self.vmax_value = 40
+        self.levels = np.arange(-2, 100, 2) 
+        self.vmin_value = 5 
+        self.vmax_value = 40 
         # --- end of input data ---
 
         # calculating rho-P relationship of planetary interior assuming that the mantle has a constant entropy.
@@ -125,7 +125,7 @@ class Model:
         elif n == 4:
             return 1.0 / 8.0 * (35 * x ** 4.0 - 30 * x ** 2.0 + 3)
         elif n == 5:
-            return 1.0 / 8.0 * (63 * x ** 5.0 - 70 * x ** 3.0 - 15 * x)
+            return 1.0 / 8.0 * (63 * x ** 5.0 - 70 * x ** 3.0 + 15 * x)
         elif n == 6:
             return 1.0 / 8.0 * (231 * x ** 6.0 - 315 * x ** 4.0 + 105 * x ** 2.0 - 5)
 
@@ -317,7 +317,7 @@ class Model:
         #plt.close()
 
         if save:
-            fig1.savefig(self.outputfigurename)
+            fig1.savefig(self.outputfigurename,dpi=500)
 
     def run_model(self):
 
@@ -359,15 +359,15 @@ class Model:
 
         # reading all the error information
         error_read = [line.split() for line in open('Model_sigma.txt')]
-        sigma0 = np.zeros(shape=(3, 4))
-        sigma1 = np.zeros(shape=(3, 4))
-        Fsigma = np.zeros(4)
+        sigma0 = np.zeros(shape=(3, 5))
+        sigma1 = np.zeros(shape=(3, 5))
+        Fsigma = np.zeros(5)
         
         for m in range(0, 3):
-            for n in range(0, 4):
+            for n in range(0, 5):
                 sigma0[m][n] = float(error_read[m+1][n])
                 sigma1[m][n] = float(error_read[m+4][n])
-        for n in range(0,4):
+        for n in range(0,5):
             Fsigma[n] =  float(error_read[7][n])
         
         critical_velocity = self.__v_cr((Mt - Mi) / (Mt + Mi),
@@ -405,11 +405,28 @@ class Model:
         f_model = h_model * IE_model * (dPE + dKE) / (
                     0.70 * Mantle_mass_model * (Mt + Mi)) / self.EM  # Mantle melt mass fraction. See Equation 9.
 
-        angle_index = int(self.impact_angle/30) # determing 
+
+        if int(self.impact_angle)==0:
+            angle_index = 0
+        elif int(self.impact_angle)==30:
+            angle_index = 1
+        elif int(self.impact_angle)==45:
+            angle_index = 2
+        elif int(self.impact_angle)==60:
+            angle_index = 3
+        elif int(self.impact_angle)==90:
+            angle_index = 4
+        else:
+            print('Choose impact angle from 0, 30, 45, 60, 90')
+            sys.exit()
+
+            
+        #angle_index = int(self.impact_angle/30) # determing 
 
         dz = np.sqrt((sigma0[0][angle_index]/IE_model)**2.0 +  (sigma0[1][angle_index]/h_model)**2.0  +  (sigma0[2][angle_index]/Mantle_mass_model)**2.0)
         u_ave_std =  u_ave  * dz
         f_model_std = f_model * dz
+
     
 
 
@@ -442,10 +459,14 @@ class Model:
         self.rr = np.linspace(rcore, 1.0,
                               30)  # radial spacing - this value 30 can be changed to a different value depending on the radial resolution you need
 
+        
         self.theta_angle = np.linspace(-np.pi, np.pi,
                                        60)  # angle spacing (psi) - this value 60 can be changed to a different value depending on the angle resoultion you need
+
         nt = int(len(self.theta_angle))  # size of angle (psi) array
         nr = int(len(self.rr))  # size of radius array
+
+        
 
         drr = (self.rr[1] - self.rr[0]) / self.rr[len(self.rr) - 1]  # radial grid size
         dangle = self.theta_angle[1] - self.theta_angle[0]  # angle grid size
