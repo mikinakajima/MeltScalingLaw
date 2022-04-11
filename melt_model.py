@@ -418,7 +418,7 @@ class Model:
             angle_index = 4
         else:
             print('Choose impact angle from 0, 30, 45, 60, 90')
-            sys.exit()
+            sys.exit(1)
 
             
         #angle_index = int(self.impact_angle/30) # determing 
