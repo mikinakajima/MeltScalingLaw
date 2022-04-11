@@ -66,7 +66,7 @@ The input parameters are:
 - `gamma`: Imapctor-to-total mass ratio.
 - `vel`: Imapct velocity normalized by mutual escape velocity.
 - `entropy0`: Initial mantle entropy (before impact).
-- `impact_angle`: Impact angle (0 is a head-on collision and 90 is the most oblique impact. Choose from 0, 30, 60, 90 degrees).
+- `impact_angle`: Impact angle (0 is a head-on collision and 90 is the most oblique impact. Choose from 0, 30, 45, 60, 90 degrees).
 - `outputfigurename`: Name of the output figure name (relevant if `save=True` is set in `Model.plot_model(save=True)`).
 - `use_tex`: Will render the figure with LaTeX if your computer has a native installation of LaTeX.
 
