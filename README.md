@@ -23,11 +23,7 @@ scipy
 
 ```
 
-Download color maps from Fabio Crameri's website by typing
-
-```
-./DownloadColormaps.sh 
-```
+Download ScientificColorMaps7.zip from [here](https://zenodo.org/record/5501399#.YlSGbzfMIqs). Make sure to have lapaz, vik, and turku folders in the directory you have the rest of the codes.
 
 
 ### Running the script
