@@ -97,7 +97,7 @@ class Model:
             print("Please choose an entropy (entropy0) value of 1100 or 3160.")
             sys.exit(1)
         if self.impact_angle not in self.impact_angle_choices:
-            print("Please choose an impact angle of 0, 30, 60 or 90 degrees!")
+            print("Please choose an impact angle of 0, 30, 45, 60 or 90 degrees!")
             sys.exit(1)
 
     # mass-radius relationship (see Section S.1.1. in our paper)
