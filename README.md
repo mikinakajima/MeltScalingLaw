@@ -1,3 +1,6 @@
+
+# Note: the latest branch is 45 degree branch. This master branch will be merged with 45 degree branch shortly (April 11, 2022)
+
 # Melt Scaling law 
 
 This is a scaling law described in 
