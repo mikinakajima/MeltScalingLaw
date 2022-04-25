@@ -474,12 +474,10 @@ class Model:
         self.du_sd = np.zeros(shape=(nr, nt))  # internal energy
         self.du_gain = np.zeros(shape=(nr, nt))  # internal energy gain
         number = np.zeros(shape=(nr, nt))
-        self.du_melt = np.zeros(shape=(nr,
-                                       nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
-        self.du_gain_melt = np.zeros(shape=(nr,
-                                            nt))  # melt model w/o considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
-
-        
+        self.du_melt = np.zeros(shape=(nr,nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
+        self.du_melt_max_sd = np.zeros(shape=(nr,nt))  # same as du_melt, with upper bound of error
+        self.du_melt_min_sd = np.zeros(shape=(nr,nt))  # same as du_melt, with lower bound of error        
+        self.du_gain_melt = np.zeros(shape=(nr,nt))  # melt model w/o considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
 
         rmax_meltpool_model = 1.0  # magma ocean depth. 1.0: no magma ocean, 0.0: the entire mantle is molten
         rmax_meltpool_model_max_sd = 1.0
@@ -535,31 +533,52 @@ class Model:
                 else:    
                     Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.011 * (Press * 1e-9)**3.0) * 1000.0 
                     
-
-                
                 # the best case scenario
                 if du[m][n] > Tmelt:
                     self.du_melt[m][n] = 1.0  # this portion of the mantle is molten
                     meltV = meltV + dV
-                    if rmax_meltpool_model > self.rr[m] and np.abs(
-                            self.theta_angle[n]) < np.pi / 6.0:  # actually this should be a bit smaller (TO DO)
-                        rmax_meltpool_model = self.rr[m]
                 else:
                     self.du_melt[m][n] = 0.0  # this portion of the mantle is NOT molten
 
                 # + sigma
                 if du_max_sd[m][n] > Tmelt:
+                    self.du_melt_max_sd[m][n] = 1.0  # this portion of the mantle is molten 
                     meltV_max_sd =  meltV_max_sd  + dV
-                    if rmax_meltpool_model_max_sd > self.rr[m] and np.abs(
-                            self.theta_angle[n]) < np.pi / 6.0:  
-                        rmax_meltpool_model_max_sd = self.rr[m]
+                else:
+                    self.du_melt_max_sd[m][n] = 0.0  # this portion of the mantle is NOT molten 
 
                 # - sigma
                 if du_min_sd[m][n] > Tmelt:
+                    self.du_melt_min_sd[m][n] = 1.0  # this portion of the mantle is molten 
                     meltV_min_sd =  meltV_min_sd  + dV
-                    if rmax_meltpool_model_min_sd > self.rr[m] and np.abs(
-                            self.theta_angle[n]) < np.pi / 6.0:  
-                        rmax_meltpool_model_min_sd = self.rr[m]
+                else:
+                    self.du_melt_min_sd[m][n] = 0.0  # this portion of the mantle is NOT molten 
+                
+        for m in range(0, nr):   # in this loop, we are avoinding an isolated melt pocket determining the melt depth
+            for n in range(0, nt):
+                if np.abs(self.theta_angle[n]) < np.pi / 6.0:
+                    if self.du_melt[m][n] == 1.0:
+                        if rmax_meltpool_model > self.rr[m]:  
+                            for j in range (m,nr):
+                                if self.du_melt[j][n] < 1.0: # if there is any solid melt at a larger r, this means that the melt pocket is isolated. In this case we define the melt depth as the deepest melt pool which extends all the way to the planetary surface
+                                    break
+                                if j == nr-1 and self.du_melt[j][n] ==  1.0:
+                                    rmax_meltpool_model = self.rr[m]
+                    if self.du_melt_max_sd[m][n] == 1.0:
+                        if rmax_meltpool_model_max_sd > self.rr[m]:  
+                            for j in range (m,nr):
+                                if self.du_melt_max_sd[j][n] < 1.0:
+                                    break
+                                if j == nr-1 and self.du_melt_max_sd[j][n] ==  1.0:
+                                    rmax_meltpool_model_max_sd = self.rr[m]
+                                
+                    if self.du_melt_min_sd[m][n] == 1.0:
+                        if rmax_meltpool_model_min_sd > self.rr[m]: 
+                            for j in range (m,nr):
+                                if self.du_melt_min_sd[j][n] < 1.0:
+                                    break
+                                if j == nr-1 and self.du_melt_min_sd[j][n] ==  1.0:
+                                    rmax_meltpool_model_min_sd = self.rr[m]
 
                     
         for m in range(0, nr):
