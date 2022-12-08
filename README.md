@@ -113,7 +113,7 @@ The calculation process is as follows:
 5. The potential energy of the target-impactor system is calculated.
 6. The initial kinetic energy of the target-impactor system is calculated.
 7. Parameter coefficients from external files are read into the model.
-8. The critical velocity is calculated (See Genda et al. 2020 or equation 16 in this paper).
+8. The critical velocity is calculated (See Equation 16 in Genda et al. 2012).
 9. The merging scenario between the impactor and target is modeled with the fitting model.
 10. The no-merging scenario between the impactor and target is modeled with the fitting model.
 11. The internal energy fitting models are applied.
