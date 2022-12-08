@@ -5,7 +5,9 @@
 
 This is a scaling law described in 
 
-Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, H. J., Jacobson, S. A., Manske, L., Hull, S. D. 2021. Scaling laws for the geometry of an impact-induced magma ocean. Earth and Planetary Science Letters, 568, 116983 [(link)](https://www.sciencedirect.com/science/article/pii/S0012821X21002429)
+Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, H. J., Jacobson, S. A., Manske, L., Hull, S. D. 2021. Scaling laws for the geometry of an impact-induced magma ocean. Earth and Planetary Science Letters, 568, 116983 [(link)](https://www.sciencedirect.com/science/article/pii/S0012821X21002429).
+
+The major difference between the publication and this code is that 45 degree impacts are now taken into account.
 
 To use the scaling law, please take the following steps.
 
@@ -24,11 +26,7 @@ scipy
 
 ```
 
-Download color maps from Fabio Crameri's website by typing
-
-```
-./DownloadColormaps.sh 
-```
+Download ScientificColorMaps7.zip from [here](https://zenodo.org/record/5501399#.YlSGbzfMIqs). Make sure to have lapaz, vik, and turku folders in the directory where you have the rest of the codes.
 
 
 ### Running the script
@@ -49,9 +47,11 @@ Here, `m = Model()` instantiates the model class (default class input parameters
 This will generate the following output as well as a plot window.
 
 ```
-magma ocean depth and pressure for a melt pool model: 2278.4837243704346 km, 86.15126263895684 GPa
-magma ocean depth and pressure for a global magma ocean model: 898.1255099313564 km, 29.474287387562157 GPa
-magma ocean depth and pressure for a conventional model: 303.5506251133121 km, 9.21756896904488 GPa
+mantle depth: 3007.93 km
+mantle volume fraction: 0.13 (+0.15, -0.09)
+magma ocean depth and pressure for a melt pool model: 726.05(+311.17, -414.89) km, 23.41(+10.86, -13.93) GPa
+magma ocean depth and pressure for a global magma ocean model: 249.06(+311.23, -180.89) km, 7.52(+10.18, -5.51) GPa
+magma ocean depth and pressure for a conventional model: 471.77(+347.14, -309.89) km, 14.73(+11.97, -9.9) GPa
 ```
 
 These are calculated depth (in km) and pressure (in GPa) at the base of a magma ocean depth for a melt pool model, global magma ocean model, and conventional model. <br />
@@ -69,7 +69,7 @@ The input parameters are:
 - `gamma`: Imapctor-to-total mass ratio.
 - `vel`: Imapct velocity normalized by mutual escape velocity.
 - `entropy0`: Initial mantle entropy (before impact).
-- `impact_angle`: Impact angle (0 is a head-on collision and 90 is the most oblique impact. Choose from 0, 30, 60, 90 degrees).
+- `impact_angle`: Impact angle (0 is a head-on collision and 90 is the most oblique impact. Choose from 0, 30, 45, 60, 90 degrees).
 - `outputfigurename`: Name of the output figure name (relevant if `save=True` is set in `Model.plot_model(save=True)`).
 - `use_tex`: Will render the figure with LaTeX if your computer has a native installation of LaTeX.
 

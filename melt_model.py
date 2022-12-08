@@ -13,7 +13,7 @@ from scipy.interpolate import interp1d
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 
-# TODO
+# TODO - error with vlarge is not quite right
 # magma ocean depth is fixed at psi = 0
 
 class Model:
@@ -28,7 +28,7 @@ class Model:
         self.a2 = 9.1442e-4  # planetary mass-radius relationship
         self.a3 = -7.4332e-5  # planetary mass-radius relationship
         self.GG = 6.67408e-11  # gravitational constant
-        self.impact_angle_choices = [0.0, 30.0, 60.0, 90.0]  # choice of impact angle
+        self.impact_angle_choices = [0.0, 30.0, 45.0, 60.0, 90.0]  # choice of impact angle
 
         self.impact_angle = float(impact_angle)  # impactor impact angle with target
 
@@ -64,9 +64,9 @@ class Model:
         self.rho_P = [line.split() for line in open(
             self.entropyfile)]  # relationship between rho-P assuming S0=3160 J/K/kg. We also assume that rho-P structure is the same at S0=1100 J/K/kg.
 
-        self.levels = np.arange(-2, 100, 2)
-        self.vmin_value = 5
-        self.vmax_value = 40
+        self.levels = np.arange(-2, 100, 2) 
+        self.vmin_value = 5 
+        self.vmax_value = 40 
         # --- end of input data ---
 
         # calculating rho-P relationship of planetary interior assuming that the mantle has a constant entropy.
@@ -97,7 +97,7 @@ class Model:
             print("Please choose an entropy (entropy0) value of 1100 or 3160.")
             sys.exit(1)
         if self.impact_angle not in self.impact_angle_choices:
-            print("Please choose an impact angle of 0, 30, 60 or 90 degrees!")
+            print("Please choose an impact angle of 0, 30, 45, 60 or 90 degrees!")
             sys.exit(1)
 
     # mass-radius relationship (see Section S.1.1. in our paper)
@@ -125,7 +125,7 @@ class Model:
         elif n == 4:
             return 1.0 / 8.0 * (35 * x ** 4.0 - 30 * x ** 2.0 + 3)
         elif n == 5:
-            return 1.0 / 8.0 * (63 * x ** 5.0 - 70 * x ** 3.0 - 15 * x)
+            return 1.0 / 8.0 * (63 * x ** 5.0 - 70 * x ** 3.0 + 15 * x)
         elif n == 6:
             return 1.0 / 8.0 * (231 * x ** 6.0 - 315 * x ** 4.0 + 105 * x ** 2.0 - 5)
 
@@ -317,7 +317,7 @@ class Model:
         #plt.close()
 
         if save:
-            fig1.savefig(self.outputfigurename)
+            fig1.savefig(self.outputfigurename,dpi=500)
 
     def run_model(self):
 
@@ -359,15 +359,15 @@ class Model:
 
         # reading all the error information
         error_read = [line.split() for line in open('Model_sigma.txt')]
-        sigma0 = np.zeros(shape=(3, 4))
-        sigma1 = np.zeros(shape=(3, 4))
-        Fsigma = np.zeros(4)
+        sigma0 = np.zeros(shape=(3, 5))
+        sigma1 = np.zeros(shape=(3, 5))
+        Fsigma = np.zeros(5)
         
         for m in range(0, 3):
-            for n in range(0, 4):
+            for n in range(0, 5):
                 sigma0[m][n] = float(error_read[m+1][n])
                 sigma1[m][n] = float(error_read[m+4][n])
-        for n in range(0,4):
+        for n in range(0,5):
             Fsigma[n] =  float(error_read[7][n])
         
         critical_velocity = self.__v_cr((Mt - Mi) / (Mt + Mi),
@@ -405,11 +405,28 @@ class Model:
         f_model = h_model * IE_model * (dPE + dKE) / (
                     0.70 * Mantle_mass_model * (Mt + Mi)) / self.EM  # Mantle melt mass fraction. See Equation 9.
 
-        angle_index = int(self.impact_angle/30) # determing 
+
+        if int(self.impact_angle)==0:
+            angle_index = 0
+        elif int(self.impact_angle)==30:
+            angle_index = 1
+        elif int(self.impact_angle)==45:
+            angle_index = 2
+        elif int(self.impact_angle)==60:
+            angle_index = 3
+        elif int(self.impact_angle)==90:
+            angle_index = 4
+        else:
+            print('Choose impact angle from 0, 30, 45, 60, 90')
+            sys.exit(1)
+
+            
+        #angle_index = int(self.impact_angle/30) # determing 
 
         dz = np.sqrt((sigma0[0][angle_index]/IE_model)**2.0 +  (sigma0[1][angle_index]/h_model)**2.0  +  (sigma0[2][angle_index]/Mantle_mass_model)**2.0)
         u_ave_std =  u_ave  * dz
         f_model_std = f_model * dz
+
     
 
 
@@ -442,10 +459,14 @@ class Model:
         self.rr = np.linspace(rcore, 1.0,
                               30)  # radial spacing - this value 30 can be changed to a different value depending on the radial resolution you need
 
+        
         self.theta_angle = np.linspace(-np.pi, np.pi,
                                        60)  # angle spacing (psi) - this value 60 can be changed to a different value depending on the angle resoultion you need
+
         nt = int(len(self.theta_angle))  # size of angle (psi) array
         nr = int(len(self.rr))  # size of radius array
+
+        
 
         drr = (self.rr[1] - self.rr[0]) / self.rr[len(self.rr) - 1]  # radial grid size
         dangle = self.theta_angle[1] - self.theta_angle[0]  # angle grid size
@@ -453,12 +474,10 @@ class Model:
         self.du_sd = np.zeros(shape=(nr, nt))  # internal energy
         self.du_gain = np.zeros(shape=(nr, nt))  # internal energy gain
         number = np.zeros(shape=(nr, nt))
-        self.du_melt = np.zeros(shape=(nr,
-                                       nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
-        self.du_gain_melt = np.zeros(shape=(nr,
-                                            nt))  # melt model w/o considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
-
-        
+        self.du_melt = np.zeros(shape=(nr,nt))  # melt model w considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
+        self.du_melt_max_sd = np.zeros(shape=(nr,nt))  # same as du_melt, with upper bound of error
+        self.du_melt_min_sd = np.zeros(shape=(nr,nt))  # same as du_melt, with lower bound of error        
+        self.du_gain_melt = np.zeros(shape=(nr,nt))  # melt model w/o considering the initial temperature profile. this is 0 or 1; if a given part of the mantle is molten, this value is 1 otherwise 0
 
         rmax_meltpool_model = 1.0  # magma ocean depth. 1.0: no magma ocean, 0.0: the entire mantle is molten
         rmax_meltpool_model_max_sd = 1.0
@@ -514,31 +533,52 @@ class Model:
                 else:    
                     Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.011 * (Press * 1e-9)**3.0) * 1000.0 
                     
-
-                
                 # the best case scenario
                 if du[m][n] > Tmelt:
                     self.du_melt[m][n] = 1.0  # this portion of the mantle is molten
                     meltV = meltV + dV
-                    if rmax_meltpool_model > self.rr[m] and np.abs(
-                            self.theta_angle[n]) < np.pi / 6.0:  # actually this should be a bit smaller (TO DO)
-                        rmax_meltpool_model = self.rr[m]
                 else:
                     self.du_melt[m][n] = 0.0  # this portion of the mantle is NOT molten
 
                 # + sigma
                 if du_max_sd[m][n] > Tmelt:
+                    self.du_melt_max_sd[m][n] = 1.0  # this portion of the mantle is molten 
                     meltV_max_sd =  meltV_max_sd  + dV
-                    if rmax_meltpool_model_max_sd > self.rr[m] and np.abs(
-                            self.theta_angle[n]) < np.pi / 6.0:  
-                        rmax_meltpool_model_max_sd = self.rr[m]
+                else:
+                    self.du_melt_max_sd[m][n] = 0.0  # this portion of the mantle is NOT molten 
 
                 # - sigma
                 if du_min_sd[m][n] > Tmelt:
+                    self.du_melt_min_sd[m][n] = 1.0  # this portion of the mantle is molten 
                     meltV_min_sd =  meltV_min_sd  + dV
-                    if rmax_meltpool_model_min_sd > self.rr[m] and np.abs(
-                            self.theta_angle[n]) < np.pi / 6.0:  
-                        rmax_meltpool_model_min_sd = self.rr[m]
+                else:
+                    self.du_melt_min_sd[m][n] = 0.0  # this portion of the mantle is NOT molten 
+                
+        for m in range(0, nr):   # in this loop, we are avoinding an isolated melt pocket determining the melt depth
+            for n in range(0, nt):
+                if np.abs(self.theta_angle[n]) < np.pi / 6.0:
+                    if self.du_melt[m][n] == 1.0:
+                        if rmax_meltpool_model > self.rr[m]:  
+                            for j in range (m,nr):
+                                if self.du_melt[j][n] < 1.0: # if there is any solid melt at a larger r, this means that the melt pocket is isolated. In this case we define the melt depth as the deepest melt pool which extends all the way to the planetary surface
+                                    break
+                                if j == nr-1 and self.du_melt[j][n] ==  1.0:
+                                    rmax_meltpool_model = self.rr[m]
+                    if self.du_melt_max_sd[m][n] == 1.0:
+                        if rmax_meltpool_model_max_sd > self.rr[m]:  
+                            for j in range (m,nr):
+                                if self.du_melt_max_sd[j][n] < 1.0:
+                                    break
+                                if j == nr-1 and self.du_melt_max_sd[j][n] ==  1.0:
+                                    rmax_meltpool_model_max_sd = self.rr[m]
+                                
+                    if self.du_melt_min_sd[m][n] == 1.0:
+                        if rmax_meltpool_model_min_sd > self.rr[m]: 
+                            for j in range (m,nr):
+                                if self.du_melt_min_sd[j][n] < 1.0:
+                                    break
+                                if j == nr-1 and self.du_melt_min_sd[j][n] ==  1.0:
+                                    rmax_meltpool_model_min_sd = self.rr[m]
 
                     
         for m in range(0, nr):
