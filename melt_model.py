@@ -673,8 +673,8 @@ class Model:
             "melt fraction": f_model,
             "rmax conventional" : rmax_conventional_model, 
             "melt model": meltV/totalV, # fractional melt volume
-            "melt_model_max_sd" =  meltV_max_sd / totalV, # fractional melt volume (max)
-            "melt_model_min_sd" =  meltV_min_sd / totalV, # fractional melt volume (min)
+            "melt_model_max" =  meltV_max_sd / totalV, # fractional melt volume (max)
+            "melt_model_min" =  meltV_min_sd / totalV, # fractional melt volume (min)
             "core mantle boundary pressure": Pcmb,
             "total volume": totalV,
             "internal energy": self.du,
