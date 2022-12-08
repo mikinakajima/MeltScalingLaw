@@ -652,6 +652,11 @@ class Model:
 
         self.du = du * 1e-5  # normalized by 10^5 J/kg
         self.du_gain = du_gain * 1e-5
+        
+        #melt_model = meltV / totalV  # calculating melt volume
+        #melt_model_max_sd =  meltV_max_sd / totalV
+        #melt_model_min_sd =  meltV_min_sd / totalV  
+        
 
         d = {
             "impact velocity": self.vel,
@@ -667,7 +672,9 @@ class Model:
             "max pressure (melt pool model)": [Pmax_meltpool_model, Pmax_meltpool_model_max_sd-Pmax_meltpool_model, -(Pmax_meltpool_model-Pmax_meltpool_model_min_sd)],            
             "melt fraction": f_model,
             "rmax conventional" : rmax_conventional_model, 
-            "melt model": meltV/totalV,
+            "melt model": meltV/totalV, # fractional melt volume
+            "melt_model_max_sd" =  meltV_max_sd / totalV, # fractional melt volume (max)
+            "melt_model_min_sd" =  meltV_min_sd / totalV, # fractional melt volume (min)
             "core mantle boundary pressure": Pcmb,
             "total volume": totalV,
             "internal energy": self.du,
