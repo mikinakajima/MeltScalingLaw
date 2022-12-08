@@ -57,6 +57,14 @@ Additionally, a figure is generated with the `Model.save_model()` function. <br 
 
 ![output.png](https://github.com/mikinakajima/MeltScalingLaw/blob/master/output.png)
 
+If you want to produce output in data (impact velocity, for example), type (in the example file)
+
+```
+print(data["impact velocity"])
+```
+
+The list of output is described in Line 656-681 in melt_model.py.
+
 ### Arguments in the Model class
 
 #### `Class Model(Mtotal=2.0, gamma=0.5, vel=2.0, entropy0=1100, impact_angle=90, outputfigurename="output.eps", use_tex=False)`
