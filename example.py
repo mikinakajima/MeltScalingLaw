@@ -4,5 +4,5 @@ m = Model(Mtotal=8.9, gamma=0.09, vel=1.0, entropy0=1100, impact_angle=90, outpu
 resp = m.run_model()
 m.plot_model(save=True)
 
-# if you want to produce an output, for example impact velocity.
+# if you want to produce an output, for example impact velocity, write
 # print(resp["impact velocity"])
