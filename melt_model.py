@@ -25,6 +25,7 @@ class Model:
         self.M0 = 6.39e22  # scaling coefficient
         self.a0 = 0.3412  # planetary mass-radius relationship
         self.a1 = -8.90e-3  # planetary mass-radius relationship
+
         self.a2 = 9.1442e-4  # planetary mass-radius relationship
         self.a3 = -7.4332e-5  # planetary mass-radius relationship
         self.GG = 6.67408e-11  # gravitational constant
@@ -227,14 +228,13 @@ class Model:
         P = 0.0
         r = Rt
         Mass = Mt
-        CoreMass = 0.3 * Mt
+        CoreMass = 0.30 * Mt
 
         while (Mass > CoreMass):
             rho = self.__compute_density(P)
             P = P + rho * self.GG * Mass / r ** 2.0 * dr
-            Mass = Mass - 4 * np.pi * rho * r ** 2.0 * dr
+            Mass = Mass - 4.0 * np.pi * rho * r ** 2.0 * dr
             r = r - dr
-
         return r / Rt
 
     # --- end of computing the structure of a planet
@@ -457,18 +457,20 @@ class Model:
 
         # grid spacing for calculating the magma ocean geometry
         self.rr = np.linspace(rcore, 1.0,
-                              30)  # radial spacing - this value 30 can be changed to a different value depending on the radial resolution you need
+                              60)  # radial spacing - this value 60 can be changed to a different value depending on the radial resolution you need
 
         
         self.theta_angle = np.linspace(-np.pi, np.pi,
-                                       60)  # angle spacing (psi) - this value 60 can be changed to a different value depending on the angle resoultion you need
+                                       120)  # angle spacing (psi) - this value 120 can be changed to a different value depending on the angle resoultion you need
 
         nt = int(len(self.theta_angle))  # size of angle (psi) array
         nr = int(len(self.rr))  # size of radius array
 
-        
+        #print(nt,nr,rcore)
+        #sys.exit()
 
-        drr = (self.rr[1] - self.rr[0]) / self.rr[len(self.rr) - 1]  # radial grid size
+
+        drr = (self.rr[1] - self.rr[0])  # radial grid size
         dangle = self.theta_angle[1] - self.theta_angle[0]  # angle grid size
         self.du = np.zeros(shape=(nr, nt))  # internal energy
         self.du_sd = np.zeros(shape=(nr, nt))  # internal energy
@@ -486,7 +488,7 @@ class Model:
         # make the internal energy as a function of r        
         for m in range(0, nr):
             for n in range(0, nt):
-                self.du[m][n] = self.__create_model(theta[self.impact_angle_choices.index(ang / np.pi * 180)],
+                self.du[m][n] = self.__create_model(theta[self.impact_angle_choices.index(ang / np.pi * 180.0)],
                                                     self.rr[m], self.theta_angle[n])
 
                 self.du_gain[m][n] = self.du[m][n]
@@ -505,11 +507,19 @@ class Model:
         du_min_sd  = np.zeros(shape=(nr, nt)) 
         
 
-        meltV = 0.0  # melt volume
-        totalV = 0.0  # total volume
+        meltV = 0.0  # melt volume 
+        totalV = 0.0  # total volume 
+
+        melt_mass = 0.0 # melt mass
+        total_mass = 0.0 # total mass
+        
         meltV_max_sd = 0.0
         meltV_min_sd = 0.0
 
+        melt_mass_max_sd = 0.0
+        melt_mass_min_sd = 0.0
+
+        
         
         for m in range(0, nr):
             for n in range(0, nt):
@@ -525,6 +535,8 @@ class Model:
                 totalV = totalV + dV
                 
                 Press = r_P_function(self.rr[m])
+                total_mass = total_mass + dV * self.__compute_density(Press) 
+                
                 
                 #Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0 #Solomatov & Stevenson model. 1000 represents Cv
 
@@ -537,6 +549,8 @@ class Model:
                 if du[m][n] > Tmelt:
                     self.du_melt[m][n] = 1.0  # this portion of the mantle is molten
                     meltV = meltV + dV
+                    melt_mass = melt_mass + dV * self.__compute_density(Press)
+                    
                 else:
                     self.du_melt[m][n] = 0.0  # this portion of the mantle is NOT molten
 
@@ -544,6 +558,8 @@ class Model:
                 if du_max_sd[m][n] > Tmelt:
                     self.du_melt_max_sd[m][n] = 1.0  # this portion of the mantle is molten 
                     meltV_max_sd =  meltV_max_sd  + dV
+                    melt_mass_max_sd = melt_mass_max_sd + dV * self.__compute_density(Press)
+                    
                 else:
                     self.du_melt_max_sd[m][n] = 0.0  # this portion of the mantle is NOT molten 
 
@@ -551,6 +567,8 @@ class Model:
                 if du_min_sd[m][n] > Tmelt:
                     self.du_melt_min_sd[m][n] = 1.0  # this portion of the mantle is molten 
                     meltV_min_sd =  meltV_min_sd  + dV
+                    melt_mass_min_sd = melt_mass_min_sd + dV * self.__compute_density(Press)                    
+                    
                 else:
                     self.du_melt_min_sd[m][n] = 0.0  # this portion of the mantle is NOT molten 
                 
@@ -590,7 +608,12 @@ class Model:
 
         melt_model = meltV / totalV  # calculating melt volume
         melt_model_max_sd =  meltV_max_sd / totalV
-        melt_model_min_sd =  meltV_min_sd / totalV        
+        melt_model_min_sd =  meltV_min_sd / totalV
+
+
+        melt_mass = melt_mass / total_mass
+        melt_mass_max_sd = melt_mass_max_sd / total_mass
+        melt_mass_min_sd = melt_mass_min_sd / total_mass    
         
         # --- estimating the magma ocean depth and corresponding pressure
 
@@ -672,9 +695,13 @@ class Model:
             "max pressure (melt pool model)": [Pmax_meltpool_model, Pmax_meltpool_model_max_sd-Pmax_meltpool_model, -(Pmax_meltpool_model-Pmax_meltpool_model_min_sd)],            
             "melt fraction": f_model,
             "rmax conventional" : rmax_conventional_model, 
-            "melt model": meltV/totalV, # fractional melt volume
-            "melt model max" :  meltV_max_sd / totalV, # fractional melt volume (max)
-            "melt model min" :  meltV_min_sd / totalV, # fractional melt volume (min)
+            "fractional melt volume":  melt_model, # fractional melt volume
+            "fractional melt volume max" :  melt_model_max_sd, # fractional melt volume (max)
+            "fractional melt volume min" :  melt_model_min_sd, # fractional melt volume (min)
+            "fractional melt mass" : melt_mass, # fractional melt mass
+            "fractional melt mass max" :  melt_mass_max_sd, # fractional melt volume (max)
+            "fractional melt mass min" :  melt_mass_min_sd, # fractional melt volume (min)
+            "total mantle mass" : total_mass * rplanet ** 3.0/Mplanet, #total mass
             "core mantle boundary pressure": Pcmb,
             "total volume": totalV,
             "internal energy": self.du,
