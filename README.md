@@ -5,8 +5,8 @@ This is a scaling law described in
 
 Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, H. J., Jacobson, S. A., Manske, L., Hull, S. D. 2021. Scaling laws for the geometry of an impact-induced magma ocean. Earth and Planetary Science Letters, 568, 116983 [(link)](https://www.sciencedirect.com/science/article/pii/S0012821X21002429).
 
-The major difference between the publication and this code is that 45 degree impacts are now taken into account. Additionally, there were bugs in the Legendre polynomials (sign mistakes), which are corrected in this version.
-
+The major difference between the publication and this code is that 45 degree impacts are now taken into account. Additionally, there were bugs in the Legendre polynomials (sign mistakes), which are corrected in this version. Another update (Jun 17, 2026) is that the orignal melt curve was not correctly implemented. Now, a user can choose ``Rubie et al 2015'' model, original model, and Rubie + Deng model.
+ 
 To use the scaling law, please take the following steps.
 
 ## Getting Started
