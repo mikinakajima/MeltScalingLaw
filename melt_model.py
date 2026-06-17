@@ -18,7 +18,7 @@ rc('text', usetex=True)
 
 class Model:
 
-    def __init__(self, Mtotal=2.0, gamma=0.5, vel=2.0, entropy0=1100, impact_angle=90,
+    def __init__(self, Mtotal=2.0, gamma=0.5, vel=2.0, entropy0=1100, impact_angle=90, Tmelt_model = "Rubie2015_model",
                  outputfigurename="output.eps", use_tex=False):
         self.Mmar = 6.4171e23  # mass of Mars
         self.R0 = 1.5717e6  # impactor radius
@@ -32,7 +32,7 @@ class Model:
         self.impact_angle_choices = [0.0, 30.0, 45.0, 60.0, 90.0]  # choice of impact angle
 
         self.impact_angle = float(impact_angle)  # impactor impact angle with target
-
+        self.Tmelt_model = Tmelt_model
 
         # color maps
         self.cm_data = np.loadtxt("vik/vik.txt")
@@ -543,10 +543,47 @@ class Model:
                 
                 #Tmelt = (2500.0 + 26.0 * Press * 1e-9 - 0.052 * (Press * 1e-9) ** 2.0) * 1000.0 #Solomatov & Stevenson model. 1000 represents Cv
 
-                if Press*1e-9 < 24.0: #Rubie et al., (2015) melt model
-                    Tmelt = (1874.0 + 55.43 * Press * 1e-9 - 1.74 * (Press * 1e-9)**2.0  + 0.0193 * (Press * 1e-9)**3.0) * 1000.0
-                else:    
-                    Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.011 * (Press * 1e-9)**3.0) * 1000.0 
+
+                if self.Tmelt_model == "old_model":
+            
+                    if Press*1e-9 < 24.0: # implemented in the original version of this code
+                        Tmelt = (1874.0 + 55.43 * Press * 1e-9 - 1.74 * (Press * 1e-9)**2.0  + 0.0193 * (Press * 1e-9)**3.0) 
+                    else:    
+                        Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.011 * (Press * 1e-9)**3.0)
+                    
+                elif self.Tmelt_model == "Rubie2015_model":
+                    if Press*1e-9 < 24.0: #Rubie et al., (2015) melt model
+                        Tmelt = (1874.0 + 55.43 * Press * 1e-9 - 1.74 * (Press * 1e-9)**2.0  + 0.0193 * (Press * 1e-9)**3.0) 
+                    else:    
+                        Tmelt = (1249.0 + 58.28 * Press * 1e-9 - 0.395 * (Press * 1e-9)**2.0  + 0.0011 * (Press * 1e-9)**3.0) 
+            
+                    
+                elif self.Tmelt_model == "Deng2023_model":
+                    
+                    if Press*1e-9 < 24.0: # At P< 24 GPa, this use the Rubie et al. (2015) model
+                        Tmelt= 2312. + 55.43*Press*1e-9 - 1.74*(Press*1e-9)**2 + 0.0193*(Press*1e-9)**3
+ 
+                    elif Press*1e-9 < 175.0: #At P > 24 GPa, Deng et al (2023) 
+                        # bridgmanite melting curve
+                        T0 = 2907.0
+                        a = 6.30
+                        c = 4.05
+                        P0 = 24.0
+                        Tmelt =  T0 * (1.0 + (Press*1e-9 - P0)/a)**(1.0/c) 
+
+                    else:
+                        # post-perovskite melting curve
+                        T0 = 6433.0
+                        a = 109.0
+                        c = 3.63
+                        P0 = 175.0
+                        Tmelt =  T0 * (1.0 + (Press*1e-9 - P0)/a)**(1.0/c)
+                    
+                    
+                Tmelt = Tmelt * 1000.0 # converting from temperature to internal energy, assuming the specific heat is 1000 J/K/kg
+
+
+                
                     
                 # the best case scenario
                 if du[m][n] > Tmelt:
