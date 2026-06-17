@@ -278,10 +278,13 @@ class Model:
             ax[i].tick_params(labelcolor='grey')
             ax[i].set_theta_zero_location('N')
 
+
+
         ax[0].text(np.pi / 5, 1.6, '(a) Internal Energy Gain', fontsize=15, color="black")
-        ax[1].text(np.pi / 5, 1.6, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
-        ax[2].text(np.pi / 5, 1.6, '(a) Total Internal Energy', fontsize=15, color="black")
-        ax[3].text(np.pi / 5, 1.6, '(b) Mantle Melt Mass Fraction', fontsize=15, color="black")
+        ax[1].text(np.pi / 5, 1.6, '(b) Mantle Melt ($du_{\rm gain}>$ latent heat)', fontsize=15, color="black")
+        ax[2].text(np.pi / 5, 1.6, '(c) Total Internal Energy', fontsize=15, color="black")
+        ax[3].text(np.pi / 5, 1.6, '(d) Mantle Melt ($T>T_{\rm melt}$)', fontsize=15, color="black")
+        
         ax[2].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=15, color="black")
         ax[3].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=15, color="black")
 
