@@ -701,7 +701,6 @@ class Model:
             "fractional melt mass" : melt_mass, # fractional melt mass
             "fractional melt mass max" :  melt_mass_max_sd, # fractional melt volume (max)
             "fractional melt mass min" :  melt_mass_min_sd, # fractional melt volume (min)
-            "total mantle mass" : total_mass * rplanet ** 3.0/Mplanet, #total mass
             "core mantle boundary pressure": Pcmb,
             "total volume": totalV,
             "internal energy": self.du,
@@ -714,5 +713,7 @@ class Model:
             "normalized depth (conventional model)": [1.0 - rmax_conventional_model,rmax_conventional_model_min_sd - rmax_conventional_model,  rmax_conventional_model_max_sd -rmax_conventional_model],            
         }
 
+#            "total mantle mass" : total_mass * rplanet ** 3.0/Mplanet, #total mass
+        
         return d
 
