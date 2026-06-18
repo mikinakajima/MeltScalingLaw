@@ -1,7 +1,6 @@
 #!/bin/sh
 
 
-
 https://zenodo.org/records/5501399#.YlSGbzfMIqs
 unzip ScientificColourMaps7.zip 
 
