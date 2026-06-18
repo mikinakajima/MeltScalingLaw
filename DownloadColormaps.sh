@@ -1,8 +1,8 @@
 #!/bin/sh
 
 
-https://zenodo.org/records/5501399#.YlSGbzfMIqs
-unzip ScientificColourMaps7.zip 
+curl -L -o ScientificColourMaps7.zip \
+"https://zenodo.org/records/5501399/files/ScientificColourMaps7.zip?download=1"
 
 unzip lapaz.zip
 unzip vik.zip
