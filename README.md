@@ -23,15 +23,14 @@ sys
 scipy
 
 ```
-You will also need to obtain color maps. To do this, you can simply run the get_colormaps.py script.
+You will also need to obtain color maps ("lapaz", "vik", "turku"). To do this, you can simply run the get_colormaps.py script.
 
 ```
 python get_colormaps.py
 
 ```
 
-
-Download ScientificColorMaps7.zip from [here](https://zenodo.org/record/5501399#.YlSGbzfMIqs). Make sure to have lapaz, vik, and turku folders in the directory where you have the rest of the codes.
+Alternatiely, you can manually download ScientificColorMaps7.zip from [here](https://zenodo.org/record/5501399#.YlSGbzfMIqs). Make sure to have lapaz, vik, and turku folders in the directory where you have the rest of the codes.
 
 
 ### Running the script
