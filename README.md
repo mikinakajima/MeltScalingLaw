@@ -7,7 +7,7 @@ Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, 
 
 The major difference between the publication and this code is that 45 degree impacts are now taken into account. Additionally, there were bugs in the Legendre polynomials (sign mistakes), which are corrected in this version. Another update (Jun 17, 2026) is that the orignal melt curve was not correctly implemented. 
 
-Now, a user can choose ``Rubie2015_model'' or ``Deng2023_model''. In the Rubie2015 model, the melt curve is based on [Rubie et al. (2015)](https://www.sciencedirect.com/science/article/pii/S0019103514005545)
+Now, a user can choose ``Rubie2015_model`` or ``Deng2023_model``. In the Rubie2015 model, the melt curve is based on [Rubie et al. (2015)](https://www.sciencedirect.com/science/article/pii/S0019103514005545)
 ```
 Rubie2015_model:
 T_melt = 1874 + 55.43 P − 1.74 P² + 0.0193 P³ (P<24 GPa)
@@ -16,8 +16,31 @@ T_melt = 1249 + 58.28 P − 0.395 P² + 0.0011 P³ (P≥24 GPa)
 Deng2023_model:
 T_melt = 1874 + 55.43 P − 1.74 P² + 0.0193 P³ (P<24 GPa)
 
+
+
 ```
 
+## Melt Model
+
+Pressure `P` is in GPa (`P = Press × 10⁻⁹`).
+
+- **P < 24 GPa**: Rubie et al. (2015)
+
+```python
+Tmelt = 2312.0 + 55.43*P - 1.74*P**2 + 0.0193*P**3
+```
+
+- **24 ≤ P < 175 GPa**: Bridgmanite melting curve (Deng et al. 2023)
+
+```python
+Tmelt = 2907.0 * (1.0 + (P - 24.0)/6.30)**(1.0/4.05)
+```
+
+- **P ≥ 175 GPa**: Post-perovskite melting curve (Deng et al. 2023)
+
+```python
+Tmelt = 6433.0 * (1.0 + (P - 175.0)/109.0)**(1.0/3.63)
+```
 
 
 where P is the pressure in GPa and T_melt is the melting temperature.  It should be noted that In the previous version, the code used 0.011 instead of 0.0011 in the high pressure branch.
