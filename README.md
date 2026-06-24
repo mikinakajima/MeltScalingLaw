@@ -26,7 +26,7 @@ T_melt = 6433.0 * (1.0 + (P - 175.0)/109.0)**(1.0/3.63) (P ≥ 175 GPa)
 ```
 
 where P is the pressure in GPa and T_melt is the melting temperature.  
-To use the scaling law, please take the following steps.
+
 
 ## Getting Started
 
