@@ -16,7 +16,7 @@ T_melt = 1249 + 58.28 P − 0.395 P² + 0.0011 P³ (P≥24 GPa)
 ```
 It should be noted that In the previous version, the code used 0.011 instead of 0.0011 in the high pressure branch.
 
-Deng2023_model is based on  the melt curve is based on [Den et al. 2023](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.064103). The P<24 GPa still uses formula similar to Rubie et al. (2015) with an elevated melting temperature at P=0 so that the melting curve is cotinous.
+Deng2023_model is based on  the melt curve is based on [Deng et al. 2023](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.107.064103). The P<24 GPa still uses formula similar to Rubie et al. (2015) with an elevated melting temperature at P=0 so that the melting curve is cotinous.
 
 ```
 Deng2023_model:
