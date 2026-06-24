@@ -5,12 +5,12 @@ This is a scaling law described in
 
 Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, H. J., Jacobson, S. A., Manske, L., Hull, S. D. 2021. Scaling laws for the geometry of an impact-induced magma ocean. Earth and Planetary Science Letters, 568, 116983 [(link)](https://www.sciencedirect.com/science/article/pii/S0012821X21002429).
 
-The major difference between the publication and this code is that 45 degree impacts are now taken into account. Additionally, there were bugs in the Legendre polynomials (sign mistakes), which are corrected in this version. Another update (Jun 17, 2026) is that the orignal melt curve was not correctly implemented. Now, a user can choose ``Rubie2015_model'' or ``Deng2023_model''. In the Rubie2015 model, the melt curve is 
+The major difference between the publication and this code is that 45 degree impacts are now taken into account. Additionally, there were bugs in the Legendre polynomials (sign mistakes), which are corrected in this version. Another update (Jun 17, 2026) is that the orignal melt curve was not correctly implemented. Now, a user can choose ``Rubie2015_model'' or ``Deng2023_model''. In the Rubie2015 model, the melt curve is based on [Rubie et al. (2015)](https://www.sciencedirect.com/science/article/pii/S0019103514005545)
 ```
 T_melt = 1874 + 55.43 P − 1.74 P² + 0.0193 P³ (P<24 GPa)
-T_melt = 1249 + 58.28 P − 0.395 P² + 0.0011 P³ (P>24 GPa)
+T_melt = 1249 + 58.28 P − 0.395 P² + 0.0011 P³ (P≥24 GPa)
 ```
- (in the previous version, the code used 0.011 instead of 0.0011 in the high pressure branch)
+ It should be noted that In the previous version, the code used 0.011 instead of 0.0011 in the high pressure branch.
 To use the scaling law, please take the following steps.
 
 ## Getting Started
