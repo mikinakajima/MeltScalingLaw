@@ -7,7 +7,8 @@ Nakajima, M., Golabek, G. J., Wuennemann, K., Rubie, D. C., Burger, C., Melosh, 
 
 The major difference between the publication and this code is that 45 degree impacts are now taken into account. Additionally, there were bugs in the Legendre polynomials (sign mistakes), which are corrected in this version. Another update (Jun 17, 2026) is that the orignal melt curve was not correctly implemented. Now, a user can choose ``Rubie2015_model'' or ``Deng2023_model''. In the Rubie2015 model, the melt curve is 
 ```
-T_melt = 1874 + 55.43 P − 1.74 P² + 0.0193 P³
+T_melt = 1874 + 55.43 P − 1.74 P² + 0.0193 P³ (P<24 GPa)
+T_melt = 1249 + 58.28 P − 0.395 P² + 0.0011 P³ (P>24 GPa)
 ```
  
 To use the scaling law, please take the following steps.
