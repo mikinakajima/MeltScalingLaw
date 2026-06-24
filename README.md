@@ -10,7 +10,7 @@ The major difference between the publication and this code is that 45 degree imp
 T_melt = 1874 + 55.43 P − 1.74 P² + 0.0193 P³ (P<24 GPa)
 T_melt = 1249 + 58.28 P − 0.395 P² + 0.0011 P³ (P>24 GPa)
 ```
- 
+ (in the previous version, the code used 0.011 instead of 0.0011 in the high pressure branch)
 To use the scaling law, please take the following steps.
 
 ## Getting Started
