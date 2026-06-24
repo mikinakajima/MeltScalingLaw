@@ -21,8 +21,8 @@ Deng2023_model is based on  the melt curve is based on [Deng et al. 2023](https:
 ```
 Deng2023_model:
 T_melt = 2312 + 55.43 P − 1.74 P² + 0.0193 P³ (P<24 GPa)
-Tmelt = 2907.0 * (1.0 + (P - 24.0)/6.30)**(1.0/4.05)(24 ≤ P < 175 GPa)
-Tmelt = 6433.0 * (1.0 + (P - 175.0)/109.0)**(1.0/3.63) (P ≥ 175 GPa)
+T_melt = 2907.0 * (1.0 + (P - 24.0)/6.30)**(1.0/4.05)(24 ≤ P < 175 GPa)
+T_melt = 6433.0 * (1.0 + (P - 175.0)/109.0)**(1.0/3.63) (P ≥ 175 GPa)
 ```
 
 where P is the pressure in GPa and T_melt is the melting temperature.  
