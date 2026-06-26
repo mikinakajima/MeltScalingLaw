@@ -67,7 +67,14 @@ m.run_model()
 m.plot_model(save=False)
 ```
 
-Here, `m = Model()` instantiates the model class (default class input parameters are shown for redundancy), `m.run_model()` executes the full series of calculations, and `m.plot_model()` plots the outputs.
+Here, `m = Model()` instantiates the model class (default class input parameters are shown for redundancy), `m.run_model()` executes the full series of calculations, and `m.plot_model()` plots the outputs. You can run the script py typing
+
+
+```
+python example.py
+```
+
+
 This will generate the following output as well as a plot window.
 
 ```
