@@ -77,13 +77,24 @@ python example.py
 
 This will generate the following output as well as a plot window.
 
-```
+<!-- comment
 mantle depth: 3007.93 km
 mantle volume fraction: 0.13 (+0.15, -0.09)
 magma ocean depth and pressure for a melt pool model: 726.05(+311.17, -414.89) km, 23.41(+10.86, -13.93) GPa
 magma ocean depth and pressure for a global magma ocean model: 249.06(+311.23, -180.89) km, 7.52(+10.18, -5.51) GPa
 magma ocean depth and pressure for a conventional model: 471.77(+347.14, -309.89) km, 14.73(+11.97, -9.9) GPa
+-->
 ```
+planetary radius: 6266.53 km
+mantle depth: 3007.93 km
+mantle volume fraction: 0.1 (+0.26, -0.08)
+magma ocean depth and pressure for a melt pool model: 713.75(+305.89, -407.86) km, 22.74(+10.89, -13.52) GPa
+magma ocean depth and pressure for a global magma ocean model: 195.55(+546.31, -146.83) km, 5.8(+18.17, -4.38) GPa
+magma ocean depth and pressure for a conventional model: 462.65(+339.36, -303.73) km, 14.27(+11.83, -9.58) GPa
+fractional melt volume: 0.10371076674044348
+fractional melt mass: 0.08710782146426402
+```
+
 
 These are calculated depth (in km) and pressure (in GPa) at the base of a magma ocean depth for a melt pool model, global magma ocean model, and conventional model. <br />
 Additionally, a figure is generated with the `Model.save_model()` function. <br />
