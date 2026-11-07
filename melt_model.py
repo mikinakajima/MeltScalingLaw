@@ -11,7 +11,6 @@ from scipy.interpolate import interp1d
 
 
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
 
 # TODO - error with vlarge is not quite right
 # magma ocean depth is fixed at psi = 0
@@ -281,9 +280,9 @@ class Model:
 
 
         ax[0].text(np.pi / 5, 1.6, '(a) Internal Energy Gain', fontsize=15, color="black")
-        ax[1].text(np.pi / 5, 1.6, '(b) Mantle Melt ($du_{\r gain}>$ latent heat)', fontsize=15, color="black")
+        ax[1].text(np.pi / 5, 1.6, r'(b) Mantle Melt ($du_{\rm gain}>$ latent heat)', fontsize=15, color="black")
         ax[2].text(np.pi / 5, 1.6, '(c) Total Internal Energy', fontsize=15, color="black")
-        ax[3].text(np.pi / 5, 1.6, '(d) Mantle Melt ($T>T_{\r melt}$)', fontsize=15, color="black")
+        ax[3].text(np.pi / 5, 1.6, r'(d) Mantle Melt ($T>T_{\rm melt}$)', fontsize=15, color="black")
         
         ax[2].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=15, color="black")
         ax[3].text(np.pi / 2, 0.4, '$S_0=$' + str(self.entropy0) + ' J/K/kg', fontsize=15, color="black")
@@ -356,8 +355,8 @@ class Model:
 
         # reading parameter coefficients for melt model
         parameter_list = [line.split() for line in open('parameter.txt')]
-        para0 = np.array(parameter_list[0][:]).astype(np.float)  # parameters for vimp=vesc cases. See Table S.5
-        para1 = np.array(parameter_list[1][:]).astype(np.float)  # parameters for vimp>1.1vesc cases. See Table S.6
+        para0 = np.array(parameter_list[0][:]).astype(float)  # parameters for vimp=vesc cases. See Table S.5
+        para1 = np.array(parameter_list[1][:]).astype(float)  # parameters for vimp>1.1vesc cases. See Table S.6
 
 
         # reading all the error information
